@@ -40,6 +40,7 @@
       font-weight:600; cursor:pointer; border:1px solid rgba(255,255,255,.1);
       background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(4px);
       user-select:none;
+      position: relative;
     }
     .available:hover { transform: translateY(-3px) scale(1.1); background: #3b82f6; color: white !important; border-color: #60a5fa; }
     .selected { background: #ffffff !important; color: #0f172a !important; box-shadow: 0 0 25px rgba(255, 255, 255, 0.5); transform: scale(1.1); border-color: white; }
@@ -49,7 +50,6 @@
       color: rgba(148,163,184,0.7) !important;
       border-color: rgba(148,163,184,0.15) !important;
       cursor:not-allowed !important;
-      position: relative;
     }
     .sold::after{
       content:"VENDIDO";
@@ -66,7 +66,6 @@
       color: rgba(251,191,36,0.9) !important;
       border-color: rgba(251,191,36,0.25) !important;
       cursor:not-allowed !important;
-      position: relative;
     }
     .reserved::after{
       content:"RESERV";
@@ -83,7 +82,7 @@
     .progress-fill {
       background: linear-gradient(to right, #fbbf24 33%, #3b82f6 33%, #3b82f6 66%, #ef4444 66%);
       box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
-      transition: width 2s cubic-bezier(0.65, 0, 0.35, 1);
+      transition: width 1.2s cubic-bezier(0.65, 0, 0.35, 1);
     }
     .payment-icon { filter: grayscale(1) opacity(0.7); transition: 0.3s; }
     .payment-icon:hover { filter: grayscale(0) opacity(1); }
@@ -178,9 +177,11 @@
 
   <script>
     // ========= CONFIG =========
-    // YA NO usamos el script directo (CORS), usamos el proxy de Vercel:
     const API_URL = "/api/gs";
-    const mp = new MercadoPago("APP_USR-5cf8db98-d91a-44c4-bb21-b2206fd823a4", { locale: "es-MX" });
+
+    // ✅ Public Key (frontend) — está bien aquí:
+    const MP_PUBLIC_KEY = "APP_USR-5cf8db98-d91a-44c4-bb21-b2206fd823a4";
+    const mp = new MercadoPago(MP_PUBLIC_KEY, { locale: "es-MX" });
 
     // ========= STATE =========
     const grid = document.getElementById("grid");
@@ -293,6 +294,11 @@
       const phone = document.getElementById("user-phone").value.trim();
       const btnPre = document.getElementById("btn-pre-pago");
 
+      if (!window.MercadoPago) {
+        alert("Mercado Pago no cargó. Recarga la página e intenta de nuevo.");
+        return;
+      }
+
       if (!currentNumber) {
         alert("Selecciona un número primero.");
         return;
@@ -344,6 +350,7 @@
 
     buildGrid();
     cargarStatus();
+    setInterval(cargarStatus, 20000);
   </script>
 </body>
 </html>
