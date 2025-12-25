@@ -178,7 +178,8 @@
 
   <script>
     // ========= CONFIG =========
-    const API_URL = "https://script.google.com/macros/s/AKfycbw7mHEYJyv2KfhqQp7-9kjJiSp1V2Md_C5sYlJc4-fkJSx1Hxe9bwZJDKRSvKDecnFA/exec"; // <-- pega tu /exec aquí
+    // YA NO usamos el script directo (CORS), usamos el proxy de Vercel:
+    const API_URL = "/api/gs";
     const mp = new MercadoPago("APP_USR-5cf8db98-d91a-44c4-bb21-b2206fd823a4", { locale: "es-MX" });
 
     // ========= STATE =========
@@ -195,10 +196,8 @@
       "¡Hermosillo presente!"
     ];
 
-    // Guardamos los elementos por número para pintarlos rápido
     const btnByNumber = new Map();
 
-    // ========= UI: crear grid =========
     function buildGrid() {
       grid.innerHTML = "";
       btnByNumber.clear();
@@ -208,7 +207,6 @@
         btn.innerText = i;
         btn.className = "number-btn available";
 
-        // colores tricolor por mod 3 (como lo tenías)
         if (i % 3 === 0) btn.style.color = "#fbbf24";
         else if (i % 3 === 1) btn.style.color = "#60a5fa";
         else btn.style.color = "#f87171";
@@ -220,7 +218,6 @@
       }
     }
 
-    // ========= API: cargar status =========
     async function cargarStatus() {
       const msg = document.getElementById("status-msg");
       msg.textContent = "Cargando números disponibles...";
@@ -229,28 +226,23 @@
         const response = await fetch(API_URL + "?action=get_status", { method: "GET" });
         const data = await response.json();
 
-        // pinta barra progreso con VENDIDOS
         const vendidos = data.vendidos_count || 0;
         const porcentaje = Math.floor((vendidos / 500) * 100);
         document.getElementById("barra-progreso").style.width = porcentaje + "%";
         document.getElementById("boletos-vendidos-texto").innerText = vendidos;
         document.getElementById("porcentaje-texto").innerText = porcentaje + "%";
 
-        // mini stats
         document.getElementById("disponibles-texto").innerText = data.disponibles_count ?? "...";
         document.getElementById("reservados-texto").innerText = data.reservados_count ?? "...";
         document.getElementById("vendidos-texto").innerText = data.vendidos_count ?? "...";
 
-        // reset grid a estado "available"
         for (const [num, btn] of btnByNumber.entries()) {
           btn.classList.remove("sold", "reserved", "selected");
           btn.classList.add("available");
           btn.style.pointerEvents = "auto";
-          // restaurar click
           btn.onclick = () => selectNumber(num, btn);
         }
 
-        // marcar vendidos
         (data.vendidos || []).forEach(n => {
           const btn = btnByNumber.get(Number(n));
           if (!btn) return;
@@ -260,7 +252,6 @@
           btn.onclick = null;
         });
 
-        // marcar reservados
         (data.reservados || []).forEach(n => {
           const btn = btnByNumber.get(Number(n));
           if (!btn) return;
@@ -272,13 +263,11 @@
 
         msg.textContent = "Listo ✅ Elige un número disponible.";
       } catch (e) {
-        msg.textContent = "No pude cargar el estado. Revisa tu API_URL del Script.";
+        msg.textContent = "No pude cargar el estado. Revisa /api/gs.";
       }
     }
 
-    // ========= seleccionar número =========
     function selectNumber(num, el) {
-      // si está sold/reserved, no hace nada
       if (el.classList.contains("sold") || el.classList.contains("reserved")) return;
 
       document.querySelectorAll(".number-btn").forEach(b => b.classList.remove("selected"));
@@ -299,7 +288,6 @@
       document.getElementById("checkout-container").scrollIntoView({ behavior: "smooth", block: "center" });
     }
 
-    // ========= pago =========
     async function renderPaymentButton() {
       const name = document.getElementById("user-name").value.trim();
       const phone = document.getElementById("user-phone").value.trim();
@@ -340,9 +328,7 @@
             initialization: { preferenceId: preference.id, redirectMode: "modal" }
           });
 
-          // refresca status para que el número quede como RESERVADO en la vista
           await cargarStatus();
-
         } else {
           throw new Error(preference.error || "Sin preference id");
         }
@@ -350,15 +336,12 @@
         alert("Error: " + error.message);
         btnPre.innerText = "Confirmar y Pagar";
         btnPre.disabled = false;
-
-        // refresca status por si alguien más lo tomó
         await cargarStatus();
       }
     }
 
     document.getElementById("btn-pre-pago").addEventListener("click", renderPaymentButton);
 
-    // ========= init =========
     buildGrid();
     cargarStatus();
   </script>
