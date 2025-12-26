@@ -86,6 +86,26 @@
     }
     .payment-icon { filter: grayscale(1) opacity(0.7); transition: 0.3s; }
     .payment-icon:hover { filter: grayscale(0) opacity(1); }
+
+    .pay-pill {
+      border: 1px solid rgba(148,163,184,.2);
+      background: rgba(2,6,23,.35);
+      padding: 12px 14px;
+      border-radius: 16px;
+      cursor: pointer;
+      user-select: none;
+      transition: .2s;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .pay-pill:hover { transform: translateY(-1px); border-color: rgba(59,130,246,.45); }
+    .pay-pill.active {
+      border-color: rgba(59,130,246,.7);
+      background: rgba(59,130,246,.15);
+      box-shadow: 0 0 0 2px rgba(59,130,246,.15) inset;
+    }
   </style>
 </head>
 
@@ -141,7 +161,8 @@
 
     <div id="checkout-container" class="hidden glass-card p-8 rounded-[2rem] border-2 border-blue-500/50 mb-12 shadow-[0_0_40px_rgba(59,130,246,0.15)] transition-all duration-500">
       <h3 class="text-xl font-bold mb-6 text-white text-center">
-        ✨ <span id="random-lucky-msg">...</span> Reservando el: <span id="selected-number-display" class="text-blue-400 text-3xl ml-2">--</span>
+        ✨ <span id="random-lucky-msg">...</span> Reservando el:
+        <span id="selected-number-display" class="text-blue-400 text-3xl ml-2">--</span>
       </h3>
 
       <div class="space-y-4 mb-8 text-left">
@@ -153,6 +174,33 @@
           <label class="block text-xs text-slate-400 mb-2 ml-1 font-bold uppercase tracking-widest">WhatsApp (Solo números)</label>
           <input type="tel" id="user-phone" placeholder="6621234567" class="w-full bg-slate-900/80 border border-slate-700 rounded-2xl p-4 text-white focus:border-blue-500 outline-none transition-all">
         </div>
+      </div>
+
+      <!-- NUEVO: selector de método -->
+      <div class="text-left mb-6">
+        <p class="text-xs text-slate-400 font-bold uppercase tracking-widest mb-2 ml-1">Método de pago</p>
+
+        <div class="grid grid-cols-1 gap-3">
+          <div id="pill-instant" class="pay-pill active" role="button" tabindex="0">
+            <div>
+              <div class="text-white font-bold">Pago inmediato</div>
+              <div class="text-xs text-slate-400">Tarjeta / saldo Mercado Pago (confirmación al instante)</div>
+            </div>
+            <div class="text-xs font-black text-blue-400">RESERVA 10 MIN</div>
+          </div>
+
+          <div id="pill-offline" class="pay-pill" role="button" tabindex="0">
+            <div>
+              <div class="text-white font-bold">Transferencia / OXXO</div>
+              <div class="text-xs text-slate-400">Puede tardar en confirmarse (Mercado Pago lo valida)</div>
+            </div>
+            <div class="text-xs font-black text-yellow-400">RESERVA 24 H</div>
+          </div>
+        </div>
+
+        <p id="reserve-note" class="text-[11px] text-slate-400 mt-3">
+          ⏳ Tu número queda reservado <b class="text-white">10 minutos</b> mientras realizas el pago inmediato.
+        </p>
       </div>
 
       <button id="btn-pre-pago" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-2xl transition-all shadow-xl shadow-blue-900/30 uppercase tracking-wider">
@@ -179,13 +227,18 @@
     // ========= CONFIG =========
     const API_URL = "/api/gs";
 
-    // ✅ Public Key (frontend) — está bien aquí:
+    // ✅ Public Key (frontend)
     const MP_PUBLIC_KEY = "APP_USR-5cf8db98-d91a-44c4-bb21-b2206fd823a4";
     const mp = new MercadoPago(MP_PUBLIC_KEY, { locale: "es-MX" });
 
     // ========= STATE =========
     const grid = document.getElementById("grid");
     let currentNumber = null;
+
+    // NUEVO: modo de pago
+    // "instant" = reserva 10 min, oculta offline
+    // "offline" = reserva 24h, permite OXXO/transfer
+    let payMode = "instant";
 
     const luckyMessages = [
       "¡Excelente elección!",
@@ -199,6 +252,36 @@
 
     const btnByNumber = new Map();
 
+    // ========= UI: selector método =========
+    const pillInstant = document.getElementById("pill-instant");
+    const pillOffline = document.getElementById("pill-offline");
+    const reserveNote = document.getElementById("reserve-note");
+
+    function setPayMode(mode) {
+      payMode = mode;
+
+      // reset del wallet si cambian el modo
+      document.getElementById("wallet_container").innerHTML = "";
+      const btnPre = document.getElementById("btn-pre-pago");
+      btnPre.style.display = "block";
+      btnPre.disabled = false;
+      btnPre.innerText = "Confirmar y Pagar";
+
+      if (mode === "offline") {
+        pillOffline.classList.add("active");
+        pillInstant.classList.remove("active");
+        reserveNote.innerHTML = `⏳ Tu número queda reservado <b class="text-white">24 horas</b> para que completes transferencia / OXXO.`;
+      } else {
+        pillInstant.classList.add("active");
+        pillOffline.classList.remove("active");
+        reserveNote.innerHTML = `⏳ Tu número queda reservado <b class="text-white">10 minutos</b> mientras realizas el pago inmediato.`;
+      }
+    }
+
+    pillInstant.addEventListener("click", () => setPayMode("instant"));
+    pillOffline.addEventListener("click", () => setPayMode("offline"));
+
+    // ========= UI: grid =========
     function buildGrid() {
       grid.innerHTML = "";
       btnByNumber.clear();
@@ -283,7 +366,8 @@
       btnPre.innerText = "Confirmar y Pagar";
 
       document.getElementById("selected-number-display").innerText = num;
-      document.getElementById("random-lucky-msg").innerText = luckyMessages[Math.floor(Math.random() * luckyMessages.length)];
+      document.getElementById("random-lucky-msg").innerText =
+        luckyMessages[Math.floor(Math.random() * luckyMessages.length)];
 
       document.getElementById("checkout-container").classList.remove("hidden");
       document.getElementById("checkout-container").scrollIntoView({ behavior: "smooth", block: "center" });
@@ -320,7 +404,8 @@
             action: "create_preference",
             number: currentNumber,
             name: name,
-            phone: phone
+            phone: phone,
+            mode: payMode   // <-- AQUÍ VA LO NUEVO
           })
         });
 
