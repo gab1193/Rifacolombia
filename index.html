@@ -224,218 +224,225 @@
   </div>
 
   <script>
-    // ========= CONFIG =========
-    const API_URL = "/api/gs";
+  // ========= CONFIG =========
+  const API_URL = "/api/gs";
 
-    // ✅ Public Key (frontend)
-    const MP_PUBLIC_KEY = "APP_USR-5cf8db98-d91a-44c4-bb21-b2206fd823a4";
-    const mp = new MercadoPago(MP_PUBLIC_KEY, { locale: "es-MX" });
+  // ✅ Public Key (frontend)
+  const MP_PUBLIC_KEY = "APP_USR-5cf8db98-d91a-44c4-bb21-b2206fd823a4";
+  const mp = new MercadoPago(MP_PUBLIC_KEY, { locale: "es-MX" });
 
-    // ========= STATE =========
-    const grid = document.getElementById("grid");
-    let currentNumber = null;
+  // ========= STATE =========
+  const grid = document.getElementById("grid");
+  let currentNumber = null;
 
-    // NUEVO: modo de pago
-    // "instant" = reserva 10 min, oculta offline
-    // "offline" = reserva 24h, permite OXXO/transfer
-    let payMode = "instant";
+  // NUEVO: modo de pago UI
+  // "instant" -> card (10 min)
+  // "offline" -> offline (24 h)
+  let payMode = "instant";
 
-    const luckyMessages = [
-      "¡Excelente elección!",
-      "¡Buena vibra!",
-      "¡El ganador!",
-      "¡A por todas!",
-      "¡Tu número de la suerte!",
-      "¡Siento la suerte!",
-      "¡Hermosillo presente!"
-    ];
+  const luckyMessages = [
+    "¡Excelente elección!",
+    "¡Buena vibra!",
+    "¡El ganador!",
+    "¡A por todas!",
+    "¡Tu número de la suerte!",
+    "¡Siento la suerte!",
+    "¡Hermosillo presente!"
+  ];
 
-    const btnByNumber = new Map();
+  const btnByNumber = new Map();
 
-    // ========= UI: selector método =========
-    const pillInstant = document.getElementById("pill-instant");
-    const pillOffline = document.getElementById("pill-offline");
-    const reserveNote = document.getElementById("reserve-note");
+  // ========= UI: selector método =========
+  const pillInstant = document.getElementById("pill-instant");
+  const pillOffline = document.getElementById("pill-offline");
+  const reserveNote = document.getElementById("reserve-note");
 
-    function setPayMode(mode) {
-      payMode = mode;
+  function resetCheckoutUI_() {
+    document.getElementById("wallet_container").innerHTML = "";
+    const btnPre = document.getElementById("btn-pre-pago");
+    btnPre.style.display = "block";
+    btnPre.disabled = false;
+    btnPre.innerText = "Confirmar y Pagar";
+  }
 
-      // reset del wallet si cambian el modo
-      document.getElementById("wallet_container").innerHTML = "";
-      const btnPre = document.getElementById("btn-pre-pago");
-      btnPre.style.display = "block";
-      btnPre.disabled = false;
-      btnPre.innerText = "Confirmar y Pagar";
+  function setPayMode(mode) {
+    payMode = mode;
+    resetCheckoutUI_();
 
-      if (mode === "offline") {
-        pillOffline.classList.add("active");
-        pillInstant.classList.remove("active");
-        reserveNote.innerHTML = `⏳ Tu número queda reservado <b class="text-white">24 horas</b> para que completes transferencia / OXXO.`;
-      } else {
-        pillInstant.classList.add("active");
-        pillOffline.classList.remove("active");
-        reserveNote.innerHTML = `⏳ Tu número queda reservado <b class="text-white">10 minutos</b> mientras realizas el pago inmediato.`;
+    if (mode === "offline") {
+      pillOffline.classList.add("active");
+      pillInstant.classList.remove("active");
+      reserveNote.innerHTML = `⏳ Tu número queda reservado <b class="text-white">24 horas</b> para que completes transferencia / OXXO.`;
+    } else {
+      pillInstant.classList.add("active");
+      pillOffline.classList.remove("active");
+      reserveNote.innerHTML = `⏳ Tu número queda reservado <b class="text-white">10 minutos</b> mientras realizas el pago inmediato.`;
+    }
+  }
+
+  pillInstant.addEventListener("click", () => setPayMode("instant"));
+  pillOffline.addEventListener("click", () => setPayMode("offline"));
+
+  // ========= UI: crear grid =========
+  function buildGrid() {
+    grid.innerHTML = "";
+    btnByNumber.clear();
+
+    for (let i = 1; i <= 500; i++) {
+      const btn = document.createElement("div");
+      btn.innerText = i;
+      btn.className = "number-btn available";
+
+      if (i % 3 === 0) btn.style.color = "#fbbf24";
+      else if (i % 3 === 1) btn.style.color = "#60a5fa";
+      else btn.style.color = "#f87171";
+
+      btn.onclick = () => selectNumber(i, btn);
+
+      grid.appendChild(btn);
+      btnByNumber.set(i, btn);
+    }
+  }
+
+  // ========= API: cargar status =========
+  async function cargarStatus() {
+    const msg = document.getElementById("status-msg");
+    msg.textContent = "Cargando números disponibles...";
+
+    try {
+      const response = await fetch(API_URL + "?action=get_status", { method: "GET" });
+      const data = await response.json();
+
+      const vendidos = data.vendidos_count || 0;
+      const porcentaje = Math.floor((vendidos / 500) * 100);
+      document.getElementById("barra-progreso").style.width = porcentaje + "%";
+      document.getElementById("boletos-vendidos-texto").innerText = vendidos;
+      document.getElementById("porcentaje-texto").innerText = porcentaje + "%";
+
+      document.getElementById("disponibles-texto").innerText = data.disponibles_count ?? "...";
+      document.getElementById("reservados-texto").innerText = data.reservados_count ?? "...";
+      document.getElementById("vendidos-texto").innerText = data.vendidos_count ?? "...";
+
+      // reset grid a available
+      for (const [num, btn] of btnByNumber.entries()) {
+        btn.classList.remove("sold", "reserved", "selected");
+        btn.classList.add("available");
+        btn.style.pointerEvents = "auto";
+        btn.onclick = () => selectNumber(num, btn);
       }
+
+      // vendidos
+      (data.vendidos || []).forEach(n => {
+        const btn = btnByNumber.get(Number(n));
+        if (!btn) return;
+        btn.classList.remove("available", "selected", "reserved");
+        btn.classList.add("sold");
+        btn.style.pointerEvents = "none";
+        btn.onclick = null;
+      });
+
+      // reservados
+      (data.reservados || []).forEach(n => {
+        const btn = btnByNumber.get(Number(n));
+        if (!btn) return;
+        btn.classList.remove("available", "selected", "sold");
+        btn.classList.add("reserved");
+        btn.style.pointerEvents = "none";
+        btn.onclick = null;
+      });
+
+      msg.textContent = "Listo ✅ Elige un número disponible.";
+    } catch (e) {
+      msg.textContent = "No pude cargar el estado. Revisa /api/gs.";
+    }
+  }
+
+  // ========= seleccionar número =========
+  function selectNumber(num, el) {
+    if (el.classList.contains("sold") || el.classList.contains("reserved")) return;
+
+    document.querySelectorAll(".number-btn").forEach(b => b.classList.remove("selected"));
+    el.classList.add("selected");
+
+    currentNumber = num;
+    resetCheckoutUI_();
+
+    document.getElementById("selected-number-display").innerText = num;
+    document.getElementById("random-lucky-msg").innerText =
+      luckyMessages[Math.floor(Math.random() * luckyMessages.length)];
+
+    document.getElementById("checkout-container").classList.remove("hidden");
+    document.getElementById("checkout-container").scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  // ========= pago =========
+  async function renderPaymentButton() {
+    const name = document.getElementById("user-name").value.trim();
+    const phone = document.getElementById("user-phone").value.trim();
+    const btnPre = document.getElementById("btn-pre-pago");
+
+    if (!window.MercadoPago) {
+      alert("Mercado Pago no cargó. Recarga la página e intenta de nuevo.");
+      return;
     }
 
-    pillInstant.addEventListener("click", () => setPayMode("instant"));
-    pillOffline.addEventListener("click", () => setPayMode("offline"));
-
-    // ========= UI: grid =========
-    function buildGrid() {
-      grid.innerHTML = "";
-      btnByNumber.clear();
-
-      for (let i = 1; i <= 500; i++) {
-        const btn = document.createElement("div");
-        btn.innerText = i;
-        btn.className = "number-btn available";
-
-        if (i % 3 === 0) btn.style.color = "#fbbf24";
-        else if (i % 3 === 1) btn.style.color = "#60a5fa";
-        else btn.style.color = "#f87171";
-
-        btn.onclick = () => selectNumber(i, btn);
-
-        grid.appendChild(btn);
-        btnByNumber.set(i, btn);
-      }
+    if (!currentNumber) {
+      alert("Selecciona un número primero.");
+      return;
     }
 
-    async function cargarStatus() {
-      const msg = document.getElementById("status-msg");
-      msg.textContent = "Cargando números disponibles...";
+    if (!name || phone.length < 10 || isNaN(phone)) {
+      alert("⚠️ WhatsApp válido (solo números, 10 dígitos).");
+      return;
+    }
 
-      try {
-        const response = await fetch(API_URL + "?action=get_status", { method: "GET" });
-        const data = await response.json();
+    // ✅ traducimos modo UI -> pay_method del Apps Script
+    const pay_method = (payMode === "offline") ? "offline" : "card";
 
-        const vendidos = data.vendidos_count || 0;
-        const porcentaje = Math.floor((vendidos / 500) * 100);
-        document.getElementById("barra-progreso").style.width = porcentaje + "%";
-        document.getElementById("boletos-vendidos-texto").innerText = vendidos;
-        document.getElementById("porcentaje-texto").innerText = porcentaje + "%";
+    btnPre.innerText = "Conectando...";
+    btnPre.disabled = true;
 
-        document.getElementById("disponibles-texto").innerText = data.disponibles_count ?? "...";
-        document.getElementById("reservados-texto").innerText = data.reservados_count ?? "...";
-        document.getElementById("vendidos-texto").innerText = data.vendidos_count ?? "...";
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "create_preference",
+          number: currentNumber,
+          name: name,
+          phone: phone,
+          pay_method: pay_method
+        })
+      });
 
-        for (const [num, btn] of btnByNumber.entries()) {
-          btn.classList.remove("sold", "reserved", "selected");
-          btn.classList.add("available");
-          btn.style.pointerEvents = "auto";
-          btn.onclick = () => selectNumber(num, btn);
-        }
+      const preference = await response.json();
 
-        (data.vendidos || []).forEach(n => {
-          const btn = btnByNumber.get(Number(n));
-          if (!btn) return;
-          btn.classList.remove("available", "selected", "reserved");
-          btn.classList.add("sold");
-          btn.style.pointerEvents = "none";
-          btn.onclick = null;
+      if (preference.ok && preference.id) {
+        btnPre.style.display = "none";
+
+        const bricksBuilder = mp.bricks();
+        await bricksBuilder.create("wallet", "wallet_container", {
+          initialization: { preferenceId: preference.id, redirectMode: "modal" }
         });
 
-        (data.reservados || []).forEach(n => {
-          const btn = btnByNumber.get(Number(n));
-          if (!btn) return;
-          btn.classList.remove("available", "selected", "sold");
-          btn.classList.add("reserved");
-          btn.style.pointerEvents = "none";
-          btn.onclick = null;
-        });
-
-        msg.textContent = "Listo ✅ Elige un número disponible.";
-      } catch (e) {
-        msg.textContent = "No pude cargar el estado. Revisa /api/gs.";
-      }
-    }
-
-    function selectNumber(num, el) {
-      if (el.classList.contains("sold") || el.classList.contains("reserved")) return;
-
-      document.querySelectorAll(".number-btn").forEach(b => b.classList.remove("selected"));
-      el.classList.add("selected");
-
-      currentNumber = num;
-
-      document.getElementById("wallet_container").innerHTML = "";
-      const btnPre = document.getElementById("btn-pre-pago");
-      btnPre.style.display = "block";
-      btnPre.disabled = false;
-      btnPre.innerText = "Confirmar y Pagar";
-
-      document.getElementById("selected-number-display").innerText = num;
-      document.getElementById("random-lucky-msg").innerText =
-        luckyMessages[Math.floor(Math.random() * luckyMessages.length)];
-
-      document.getElementById("checkout-container").classList.remove("hidden");
-      document.getElementById("checkout-container").scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-
-    async function renderPaymentButton() {
-      const name = document.getElementById("user-name").value.trim();
-      const phone = document.getElementById("user-phone").value.trim();
-      const btnPre = document.getElementById("btn-pre-pago");
-
-      if (!window.MercadoPago) {
-        alert("Mercado Pago no cargó. Recarga la página e intenta de nuevo.");
-        return;
-      }
-
-      if (!currentNumber) {
-        alert("Selecciona un número primero.");
-        return;
-      }
-
-      if (!name || phone.length < 10 || isNaN(phone)) {
-        alert("⚠️ WhatsApp válido (solo números, 10 dígitos).");
-        return;
-      }
-
-      btnPre.innerText = "Conectando...";
-      btnPre.disabled = true;
-
-      try {
-        const response = await fetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "create_preference",
-            number: currentNumber,
-            name: name,
-            phone: phone,
-            mode: payMode   // <-- AQUÍ VA LO NUEVO
-          })
-        });
-
-        const preference = await response.json();
-
-        if (preference.ok && preference.id) {
-          btnPre.style.display = "none";
-
-          const bricksBuilder = mp.bricks();
-          await bricksBuilder.create("wallet", "wallet_container", {
-            initialization: { preferenceId: preference.id, redirectMode: "modal" }
-          });
-
-          await cargarStatus();
-        } else {
-          throw new Error(preference.error || "Sin preference id");
-        }
-      } catch (error) {
-        alert("Error: " + error.message);
-        btnPre.innerText = "Confirmar y Pagar";
-        btnPre.disabled = false;
         await cargarStatus();
+      } else {
+        throw new Error(preference.error || "Sin preference id");
       }
+    } catch (error) {
+      alert("Error: " + error.message);
+      btnPre.innerText = "Confirmar y Pagar";
+      btnPre.disabled = false;
+      await cargarStatus();
     }
+  }
 
-    document.getElementById("btn-pre-pago").addEventListener("click", renderPaymentButton);
+  document.getElementById("btn-pre-pago").addEventListener("click", renderPaymentButton);
 
-    buildGrid();
-    cargarStatus();
-    setInterval(cargarStatus, 20000);
-  </script>
+  // ========= init =========
+  buildGrid();
+  cargarStatus();
+  setInterval(cargarStatus, 20000);
+</script>
 </body>
 </html>
