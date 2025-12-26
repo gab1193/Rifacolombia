@@ -106,6 +106,95 @@
       background: rgba(59,130,246,.15);
       box-shadow: 0 0 0 2px rgba(59,130,246,.15) inset;
     }
+
+    /* ===== Overlay Confirmación ===== */
+    .overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(2,6,23,.75);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+    }
+    .overlay.show { display: flex; }
+    .ticket-card{
+      background: rgba(30,41,59,.65);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 28px;
+      box-shadow: 0 10px 40px rgba(0,0,0,.4);
+      width: 100%;
+      max-width: 520px;
+      overflow: hidden;
+    }
+    .ticket-head{
+      padding: 18px 18px 14px 18px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      background: linear-gradient(135deg, rgba(59,130,246,.18), rgba(251,191,36,.12), rgba(239,68,68,.10));
+    }
+    .badge{
+      display:inline-flex; align-items:center; gap:8px;
+      border: 1px solid rgba(255,255,255,.15);
+      background: rgba(2,6,23,.35);
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .ticket-body{ padding: 18px; }
+    .kv { display:flex; justify-content:space-between; gap:12px; padding: 10px 0; border-bottom: 1px dashed rgba(255,255,255,.08); }
+    .kv:last-child{ border-bottom: none; }
+    .kv .k{ color: rgba(148,163,184,1); font-size: 12px; text-transform: uppercase; letter-spacing:.16em; font-weight: 800; }
+    .kv .v{ color: white; font-weight: 700; }
+    .big-number{
+      font-size: 60px;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      color: white;
+      text-shadow: 0 0 20px rgba(59,130,246,.2);
+    }
+    .btnx{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding: 12px 14px;
+      border-radius: 16px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing:.12em;
+      transition:.2s;
+      width: 100%;
+    }
+    .btn-primary{ background:#3b82f6; color:white; }
+    .btn-primary:hover{ filter: brightness(1.08); transform: translateY(-1px); }
+    .btn-ghost{
+      border: 1px solid rgba(148,163,184,.22);
+      background: rgba(2,6,23,.25);
+      color: rgba(226,232,240,1);
+    }
+    .btn-ghost:hover{ border-color: rgba(59,130,246,.5); transform: translateY(-1px); }
+    .spinner{
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 3px solid rgba(255,255,255,.2);
+      border-top-color: white;
+      animation: spin 1s linear infinite;
+      display:inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* impresión del ticket */
+    @media print {
+      body { background: white !important; }
+      .overlay { position: static; display: block !important; background: transparent; backdrop-filter:none; }
+      #overlayClose { display:none !important; }
+      #ticketActions { display:none !important; }
+      .ticket-card { box-shadow:none; border:1px solid #ddd; background: white; }
+      .ticket-body, .ticket-head { color: #111827 !important; background: white !important; }
+      .kv .k { color: #374151 !important; }
+      .kv .v { color: #111827 !important; }
+      .big-number { color: #111827 !important; text-shadow:none; }
+    }
   </style>
 </head>
 
@@ -176,7 +265,7 @@
         </div>
       </div>
 
-      <!-- NUEVO: selector de método -->
+      <!-- selector método -->
       <div class="text-left mb-6">
         <p class="text-xs text-slate-400 font-bold uppercase tracking-widest mb-2 ml-1">Método de pago</p>
 
@@ -223,7 +312,48 @@
     </div>
   </div>
 
-  <script>
+  <!-- ===== Overlay Confirmación + Boleto ===== -->
+  <div id="confirmOverlay" class="overlay" aria-hidden="true">
+    <div class="ticket-card">
+      <div class="ticket-head">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <div class="text-white font-black text-xl">Tu compra</div>
+            <div id="ovSubtitle" class="text-slate-200/80 text-sm">Verificando el pago…</div>
+          </div>
+          <button id="overlayClose" class="btnx btn-ghost" style="width:auto; padding:10px 12px;">Cerrar</button>
+        </div>
+        <div class="mt-4 flex items-center justify-between gap-3">
+          <span id="ovBadge" class="badge"><span class="spinner"></span> PROCESANDO</span>
+          <div class="text-right">
+            <div class="text-slate-200/70 text-xs uppercase tracking-[.2em] font-black">Número</div>
+            <div id="ovNumber" class="big-number">--</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ticket-body">
+        <div id="ticketKVs" class="space-y-0">
+          <div class="kv"><div class="k">Participante</div><div id="tName" class="v">—</div></div>
+          <div class="kv"><div class="k">WhatsApp</div><div id="tPhone" class="v">—</div></div>
+          <div class="kv"><div class="k">Estado</div><div id="tStatus" class="v">—</div></div>
+          <div class="kv"><div class="k">Pago ID</div><div id="tPayId" class="v">—</div></div>
+          <div class="kv"><div class="k">Fecha</div><div id="tDate" class="v">—</div></div>
+        </div>
+
+        <div id="ticketActions" class="mt-6 space-y-3">
+          <button id="btnPrint" class="btnx btn-primary">Guardar / Imprimir boleto</button>
+          <button id="btnRefreshStatus" class="btnx btn-ghost">Actualizar estado</button>
+        </div>
+
+        <p class="text-[11px] text-slate-400 mt-5 leading-relaxed">
+          Tip: Si pagaste por <b class="text-white">transferencia/OXXO</b>, puede tardar. Tu número queda reservado y cuando MP lo confirme, se pondrá <b class="text-white">VENDIDO</b>.
+        </p>
+      </div>
+    </div>
+  </div>
+
+<script>
   // ========= CONFIG =========
   const API_URL = "/api/gs";
 
@@ -235,10 +365,8 @@
   const grid = document.getElementById("grid");
   let currentNumber = null;
 
-  // NUEVO: modo de pago UI
-  // "instant" -> card (10 min)
-  // "offline" -> offline (24 h)
-  let payMode = "instant";
+  // modo UI
+  let payMode = "instant"; // instant/offline
 
   const luckyMessages = [
     "¡Excelente elección!",
@@ -283,7 +411,7 @@
   pillInstant.addEventListener("click", () => setPayMode("instant"));
   pillOffline.addEventListener("click", () => setPayMode("offline"));
 
-  // ========= UI: crear grid =========
+  // ========= UI: grid =========
   function buildGrid() {
     grid.innerHTML = "";
     btnByNumber.clear();
@@ -304,7 +432,6 @@
     }
   }
 
-  // ========= API: cargar status =========
   async function cargarStatus() {
     const msg = document.getElementById("status-msg");
     msg.textContent = "Cargando números disponibles...";
@@ -323,7 +450,7 @@
       document.getElementById("reservados-texto").innerText = data.reservados_count ?? "...";
       document.getElementById("vendidos-texto").innerText = data.vendidos_count ?? "...";
 
-      // reset grid a available
+      // reset grid
       for (const [num, btn] of btnByNumber.entries()) {
         btn.classList.remove("sold", "reserved", "selected");
         btn.classList.add("available");
@@ -357,7 +484,6 @@
     }
   }
 
-  // ========= seleccionar número =========
   function selectNumber(num, el) {
     if (el.classList.contains("sold") || el.classList.contains("reserved")) return;
 
@@ -375,7 +501,7 @@
     document.getElementById("checkout-container").scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
-  // ========= pago =========
+  // ========= CREAR PAGO =========
   async function renderPaymentButton() {
     const name = document.getElementById("user-name").value.trim();
     const phone = document.getElementById("user-phone").value.trim();
@@ -385,18 +511,15 @@
       alert("Mercado Pago no cargó. Recarga la página e intenta de nuevo.");
       return;
     }
-
     if (!currentNumber) {
       alert("Selecciona un número primero.");
       return;
     }
-
     if (!name || phone.length < 10 || isNaN(phone)) {
       alert("⚠️ WhatsApp válido (solo números, 10 dígitos).");
       return;
     }
 
-    // ✅ traducimos modo UI -> pay_method del Apps Script
     const pay_method = (payMode === "offline") ? "offline" : "card";
 
     btnPre.innerText = "Conectando...";
@@ -420,6 +543,10 @@
       if (preference.ok && preference.id) {
         btnPre.style.display = "none";
 
+        // Guardamos preference_id en localStorage para mostrar boleto al volver
+        localStorage.setItem("last_preference_id", preference.id);
+        localStorage.setItem("last_number", String(currentNumber));
+
         const bricksBuilder = mp.bricks();
         await bricksBuilder.create("wallet", "wallet_container", {
           initialization: { preferenceId: preference.id, redirectMode: "modal" }
@@ -439,10 +566,193 @@
 
   document.getElementById("btn-pre-pago").addEventListener("click", renderPaymentButton);
 
-  // ========= init =========
+  // ========= OVERLAY / BOLETO =========
+  const overlay = document.getElementById("confirmOverlay");
+  const overlayClose = document.getElementById("overlayClose");
+  const ovSubtitle = document.getElementById("ovSubtitle");
+  const ovBadge = document.getElementById("ovBadge");
+  const ovNumber = document.getElementById("ovNumber");
+
+  const tName = document.getElementById("tName");
+  const tPhone = document.getElementById("tPhone");
+  const tStatus = document.getElementById("tStatus");
+  const tPayId = document.getElementById("tPayId");
+  const tDate = document.getElementById("tDate");
+
+  const btnPrint = document.getElementById("btnPrint");
+  const btnRefreshStatus = document.getElementById("btnRefreshStatus");
+
+  function showOverlay() {
+    overlay.classList.add("show");
+    overlay.setAttribute("aria-hidden", "false");
+  }
+  function hideOverlay() {
+    overlay.classList.remove("show");
+    overlay.setAttribute("aria-hidden", "true");
+  }
+  overlayClose.addEventListener("click", hideOverlay);
+
+  btnPrint.addEventListener("click", () => window.print());
+
+  function setBadge(type, text) {
+    // type: ok | pending | fail | loading
+    let html = "";
+    if (type === "loading") html = `<span class="spinner"></span> ${text}`;
+    if (type === "ok") html = `✅ ${text}`;
+    if (type === "pending") html = `🕒 ${text}`;
+    if (type === "fail") html = `❌ ${text}`;
+    ovBadge.innerHTML = html;
+  }
+
+  function formatDate(val){
+    try {
+      if (!val) return "—";
+      const d = (typeof val === "string") ? new Date(val) : new Date(val);
+      if (isNaN(d.getTime())) return String(val);
+      return d.toLocaleString("es-MX");
+    } catch {
+      return String(val || "—");
+    }
+  }
+
+  async function loadTicketByPreference(preferenceId) {
+    const r = await fetch(API_URL + `?action=get_ticket&preference_id=${encodeURIComponent(preferenceId)}`, { method: "GET" });
+    return await r.json();
+  }
+
+  async function verifyPayment(paymentId) {
+    const r = await fetch(API_URL + `?action=verify_payment&payment_id=${encodeURIComponent(paymentId)}`, { method: "GET" });
+    return await r.json();
+  }
+
+  function paintTicketFromSheet(ticket) {
+    ovNumber.textContent = ticket.numero ? String(ticket.numero) : (localStorage.getItem("last_number") || "--");
+    tName.textContent = ticket.nombre || "—";
+    tPhone.textContent = ticket.whatsapp || "—";
+    tStatus.textContent = ticket.estado || "—";
+    tPayId.textContent = ticket.id_pago || "—";
+    tDate.textContent = formatDate(ticket.fecha);
+  }
+
+  function paintBasicFallback() {
+    ovNumber.textContent = localStorage.getItem("last_number") || "--";
+    tName.textContent = "—";
+    tPhone.textContent = "—";
+    tStatus.textContent = "—";
+    tPayId.textContent = "—";
+    tDate.textContent = "—";
+  }
+
+  async function refreshOverlayStatus() {
+    showOverlay();
+    setBadge("loading", "VERIFICANDO");
+    ovSubtitle.textContent = "Verificando tu pago con Mercado Pago…";
+
+    const qs = new URLSearchParams(window.location.search);
+
+    // datos posibles que regresa MP
+    const pago = qs.get("pago"); // success/pending/failure
+    const payment_id = qs.get("payment_id") || qs.get("collection_id") || "";
+    const status = qs.get("status") || "";
+    const preference_id_from_qs = qs.get("preference_id") || "";
+
+    const prefFromStorage = localStorage.getItem("last_preference_id") || "";
+    const pref = preference_id_from_qs || prefFromStorage;
+
+    // 1) Pintamos ticket desde sheet (si existe preference)
+    if (pref) {
+      try {
+        const ticket = await loadTicketByPreference(pref);
+        if (ticket.ok) {
+          paintTicketFromSheet(ticket);
+        } else {
+          paintBasicFallback();
+        }
+      } catch {
+        paintBasicFallback();
+      }
+    } else {
+      paintBasicFallback();
+    }
+
+    // 2) Si tenemos payment_id, verificamos status REAL en MP
+    if (payment_id) {
+      try {
+        const v = await verifyPayment(payment_id);
+        if (v.ok) {
+          // status real
+          if (v.status === "approved") {
+            setBadge("ok", "PAGO APROBADO");
+            ovSubtitle.textContent = "¡Listo! Tu boleto ya está confirmado.";
+            tStatus.textContent = "VENDIDO (aprobado)";
+            tPayId.textContent = v.id || payment_id;
+          } else if (v.status === "pending" || v.status === "in_process") {
+            setBadge("pending", "PAGO PENDIENTE");
+            ovSubtitle.textContent = "Tu pago está en proceso. Puedes volver después a actualizar.";
+            tStatus.textContent = "RESERVADO / PENDIENTE";
+            tPayId.textContent = v.id || payment_id;
+          } else {
+            setBadge("fail", "PAGO NO APROBADO");
+            ovSubtitle.textContent = "No se aprobó el pago. Puedes intentar de nuevo.";
+            tStatus.textContent = `NO APROBADO (${v.status})`;
+            tPayId.textContent = v.id || payment_id;
+          }
+        } else {
+          // no se pudo consultar MP, usamos fallback por query
+          if (pago === "success" || status === "approved") {
+            setBadge("ok", "PAGO APROBADO");
+            ovSubtitle.textContent = "Pago aprobado. Si tu boleto tarda en reflejarse, actualiza en unos segundos.";
+          } else if (pago === "pending" || status === "pending") {
+            setBadge("pending", "PAGO PENDIENTE");
+            ovSubtitle.textContent = "Tu pago está en proceso.";
+          } else if (pago === "failure") {
+            setBadge("fail", "PAGO FALLIDO");
+            ovSubtitle.textContent = "No se completó el pago.";
+          } else {
+            setBadge("pending", "PROCESANDO");
+            ovSubtitle.textContent = "No pude verificar automáticamente. Intenta actualizar estado.";
+          }
+        }
+      } catch {
+        setBadge("pending", "PROCESANDO");
+        ovSubtitle.textContent = "No pude verificar automáticamente. Intenta actualizar estado.";
+      }
+    } else {
+      // Sin payment_id: usamos el pago=success/pending/failure
+      if (pago === "success" || status === "approved") {
+        setBadge("ok", "PAGO APROBADO");
+        ovSubtitle.textContent = "¡Listo! Si no ves el boleto aún, actualiza en unos segundos.";
+      } else if (pago === "pending" || status === "pending") {
+        setBadge("pending", "PAGO PENDIENTE");
+        ovSubtitle.textContent = "Tu pago está en proceso. Puedes volver después a actualizar.";
+      } else if (pago === "failure") {
+        setBadge("fail", "PAGO FALLIDO");
+        ovSubtitle.textContent = "No se completó el pago. Intenta de nuevo.";
+      } else {
+        // No venimos de MP
+        hideOverlay();
+        return;
+      }
+    }
+  }
+
+  btnRefreshStatus.addEventListener("click", async () => {
+    await refreshOverlayStatus();
+    await cargarStatus();
+  });
+
+  // ========= INIT =========
   buildGrid();
   cargarStatus();
   setInterval(cargarStatus, 20000);
+
+  // Si venimos de MP, abrimos overlay
+  (async function(){
+    const qs = new URLSearchParams(window.location.search);
+    if (qs.get("pago") || qs.get("payment_id") || qs.get("collection_id") || qs.get("status") || qs.get("preference_id")) {
+      await refreshOverlayStatus();
+    }
+  })();
 </script>
 </body>
 </html>
