@@ -842,6 +842,16 @@ function hideOverlay() {
     const r = await fetch(API_URL + `?action=verify_payment&payment_id=${encodeURIComponent(paymentId)}`, { method: "GET" });
     return await r.json();
   }
+  async function releaseReservationByPreference(preferenceId) {
+  if (!preferenceId) return;
+  try {
+    await fetch(API_URL + `?action=release_reservation&preference_id=${encodeURIComponent(preferenceId)}`, {
+      method: "GET"
+    });
+  } catch (e) {
+    // silencioso a propósito
+  }
+}
 
   function paintTicketFromSheet(ticket) {
     ovNumber.textContent = ticket.numero ? String(ticket.numero) : (localStorage.getItem("last_number") || "--");
@@ -912,6 +922,13 @@ function hideOverlay() {
             ovSubtitle.textContent = "No se aprobó el pago. Puedes intentar de nuevo.";
             tStatus.textContent = `NO APROBADO (${v.status})`;
             tPayId.textContent = v.id || payment_id;
+            // ✅ liberar el número si NO fue aprobado (tarjeta)
+// (y refrescar la grilla para que vuelva a estar disponible)
+await releaseReservationByPreference(pref);
+localStorage.removeItem("last_preference_id");
+localStorage.removeItem("last_number");
+await cargarStatus();
+
           }
         } else {
           if (pago === "success" || status === "approved") {
