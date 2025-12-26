@@ -7,21 +7,26 @@ module.exports = async (req, res) => {
   }
 
   try {
-    // GET -> /api/gs?action=get_status
+    // ===== GET: reenvía TODOS los query params =====
     if (req.method === "GET") {
-      const action = req.query.action || "";
-      const url = `${GAS_URL}?action=${encodeURIComponent(action)}`;
-      const r = await fetch(url);
-      const data = await r.json();
-      res.status(200).json(data);
-      return;
+      const url = new URL(GAS_URL);
+
+      for (const [k, v] of Object.entries(req.query || {})) {
+        url.searchParams.set(k, String(v));
+      }
+
+      const r = await fetch(url.toString(), { method: "GET" });
+      const text = await r.text();
+
+      res.status(r.status);
+      res.setHeader("Content-Type", "application/json");
+      return res.send(text);
     }
 
-    // POST -> /api/gs
+    // ===== POST: reenvía JSON tal cual =====
     if (req.method === "POST") {
-      const body = typeof req.body === "string"
-        ? JSON.parse(req.body)
-        : req.body;
+      const body =
+        typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
 
       const r = await fetch(GAS_URL, {
         method: "POST",
@@ -30,16 +35,14 @@ module.exports = async (req, res) => {
       });
 
       const text = await r.text();
-      let data;
-      try { data = JSON.parse(text); }
-      catch { data = { ok: false, error: text }; }
 
-      res.status(200).json(data);
-      return;
+      res.status(r.status);
+      res.setHeader("Content-Type", "application/json");
+      return res.send(text);
     }
 
-    res.status(405).json({ ok: false, error: "Método no permitido" });
+    return res.status(405).json({ ok: false, error: "Método no permitido" });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err.toString() });
+    return res.status(500).json({ ok: false, error: String(err) });
   }
 };
