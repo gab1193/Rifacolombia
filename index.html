@@ -6,6 +6,7 @@
   <title>Rifa Colombia 2026 🇨🇴</title>
   <script src="https://sdk.mercadopago.com/js/v2"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
 
   <style>
@@ -442,6 +443,42 @@
           <div class="kv"><div class="k">Pago ID</div><div id="tPayId" class="v">—</div></div>
           <div class="kv"><div class="k">Fecha</div><div id="tDate" class="v">—</div></div>
         </div>
+<!-- LINK PERMANENTE + QR -->
+<div id="ticketShare" class="mt-6 p-4 rounded-2xl border border-slate-700/40 bg-slate-900/30">
+  <div class="flex items-center justify-between gap-3">
+    <div>
+      <div class="text-xs font-black tracking-[.2em] uppercase text-slate-400">Tu boleto permanente</div>
+      <div class="text-slate-200 text-sm">Guárdalo o compártelo (incluye QR).</div>
+    </div>
+    <div class="text-xs font-black text-blue-400" id="shareStatus">—</div>
+  </div>
+
+  <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+    <!-- Link -->
+    <div>
+      <div class="text-xs text-slate-400 font-bold uppercase tracking-widest mb-2">Link</div>
+      <div class="flex gap-2">
+        <input id="ticketLinkInput" class="w-full bg-slate-950/40 border border-slate-700 rounded-2xl px-4 py-3 text-white text-sm outline-none"
+               readonly value="—"/>
+        <button id="btnCopyLink" class="btnx btn-ghost" style="width:auto; padding:10px 12px;">Copiar</button>
+      </div>
+      <p class="text-[11px] text-slate-400 mt-2 leading-relaxed">
+        Tip: si cierran la página, con este link pueden volver a ver el boleto.
+      </p>
+    </div>
+
+    <!-- QR -->
+    <div>
+      <div class="text-xs text-slate-400 font-bold uppercase tracking-widest mb-2">QR</div>
+      <div class="flex items-center justify-center bg-slate-950/30 border border-slate-700 rounded-2xl p-4">
+        <div id="ticketQR"></div>
+      </div>
+      <p class="text-[11px] text-slate-400 mt-2 leading-relaxed">
+        Escanéalo para abrir tu boleto.
+      </p>
+    </div>
+  </div>
+</div>
 
         <div id="ticketActions" class="mt-6 space-y-3">
           <button id="btnPrint" class="btnx btn-primary">Guardar / Imprimir boleto</button>
@@ -683,6 +720,58 @@
 
   const btnPrint = document.getElementById("btnPrint");
   const btnRefreshStatus = document.getElementById("btnRefreshStatus");
+// ===== SHARE (LINK + QR) =====
+const ticketLinkInput = document.getElementById("ticketLinkInput");
+const btnCopyLink = document.getElementById("btnCopyLink");
+const ticketQR = document.getElementById("ticketQR");
+const shareStatus = document.getElementById("shareStatus");
+
+function buildPermanentTicketLink(preferenceId) {
+  const BASE_URL = "https://rifacolombia.vercel.app"; // tu dominio fijo
+  return BASE_URL + "/?ticket=" + encodeURIComponent(preferenceId);
+}
+
+
+function setShareUI(preferenceId) {
+  if (!preferenceId) {
+    shareStatus.textContent = "SIN LINK";
+    ticketLinkInput.value = "—";
+    ticketQR.innerHTML = "";
+    return;
+  }
+
+  const link = buildPermanentTicketLink(preferenceId);
+  shareStatus.textContent = "LISTO";
+  ticketLinkInput.value = link;
+
+  // Generar QR
+  ticketQR.innerHTML = "";
+  if (window.QRCode) {
+    new QRCode(ticketQR, {
+      text: link,
+      width: 150,
+      height: 150
+    });
+  } else {
+    // si no cargó la librería
+    ticketQR.innerHTML = `<div class="text-xs text-slate-300">No cargó QRCode</div>`;
+  }
+}
+
+if (btnCopyLink) {
+  btnCopyLink.addEventListener("click", async () => {
+    try {
+      const text = ticketLinkInput.value;
+      if (!text || text === "—") return;
+      await navigator.clipboard.writeText(text);
+      btnCopyLink.textContent = "¡Copiado!";
+      setTimeout(() => (btnCopyLink.textContent = "Copiar"), 1200);
+    } catch {
+      alert("No pude copiar. Copia manualmente el link.");
+    }
+  });
+}
+
 
   function showOverlay() {
     overlay.classList.add("show");
@@ -750,16 +839,23 @@
     setBadge("loading", "VERIFICANDO");
     ovSubtitle.textContent = "Verificando tu pago con Mercado Pago…";
 
-    const qs = new URLSearchParams(window.location.search);
+const qs = new URLSearchParams(window.location.search);
 
-    // datos posibles que regresa MP
-    const pago = qs.get("pago"); // success/pending/failure
-    const payment_id = qs.get("payment_id") || qs.get("collection_id") || "";
-    const status = qs.get("status") || "";
-    const preference_id_from_qs = qs.get("preference_id") || "";
+// datos posibles que regresa MP
+const pago = qs.get("pago"); // success/pending/failure
+const payment_id = qs.get("payment_id") || qs.get("collection_id") || "";
+const status = qs.get("status") || "";
 
-    const prefFromStorage = localStorage.getItem("last_preference_id") || "";
-    const pref = preference_id_from_qs || prefFromStorage;
+// NUEVO: ticket permanente
+const ticket_pref = qs.get("ticket") || "";
+
+// preference_id desde MP (a veces viene) o guardada
+const preference_id_from_qs = qs.get("preference_id") || "";
+
+// prioridad: ticket=  -> preference_id_from_qs -> localStorage
+const prefFromStorage = localStorage.getItem("last_preference_id") || "";
+const pref = ticket_pref || preference_id_from_qs || prefFromStorage;
+
 
     // 1) Pintamos ticket desde sheet (si existe preference)
     if (pref) {
@@ -776,6 +872,8 @@
     } else {
       paintBasicFallback();
     }
+// Link + QR
+setShareUI(pref);
 
     // 2) Si tenemos payment_id, verificamos status REAL en MP
     if (payment_id) {
@@ -851,9 +949,17 @@
   // Si venimos de MP, abrimos overlay
   (async function(){
     const qs = new URLSearchParams(window.location.search);
-    if (qs.get("pago") || qs.get("payment_id") || qs.get("collection_id") || qs.get("status") || qs.get("preference_id")) {
-      await refreshOverlayStatus();
-    }
+if (
+  qs.get("ticket") ||
+  qs.get("pago") ||
+  qs.get("payment_id") ||
+  qs.get("collection_id") ||
+  qs.get("status") ||
+  qs.get("preference_id")
+) {
+  await refreshOverlayStatus();
+}
+
   })();
   // ===== FAQ Toggle =====
 (function initFAQ(){
