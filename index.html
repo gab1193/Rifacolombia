@@ -109,6 +109,9 @@
     }
 
     /* ===== Overlay Confirmación ===== */
+    /* ✅ FIX 1: overlay y ticket scrolleable + bloquear fondo */
+    body.modal-open { overflow: hidden; height: 100vh; }
+
     .overlay {
       position: fixed; inset: 0; z-index: 9999;
       background: rgba(2,6,23,.75);
@@ -117,8 +120,12 @@
       align-items: center;
       justify-content: center;
       padding: 18px;
+
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
     }
     .overlay.show { display: flex; }
+
     .ticket-card{
       background: rgba(30,41,59,.65);
       border: 1px solid rgba(255,255,255,.08);
@@ -126,8 +133,12 @@
       box-shadow: 0 10px 40px rgba(0,0,0,.4);
       width: 100%;
       max-width: 520px;
-      overflow: hidden;
+
+      max-height: calc(100vh - 36px);
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
     }
+
     .ticket-head{
       padding: 18px 18px 14px 18px;
       border-bottom: 1px solid rgba(255,255,255,.06);
@@ -186,11 +197,11 @@
 
     /* impresión del ticket */
     @media print {
-      body { background: white !important; }
-      .overlay { position: static; display: block !important; background: transparent; backdrop-filter:none; }
+      body { background: white !important; overflow: visible !important; height:auto !important; }
+      .overlay { position: static; display: block !important; background: transparent; backdrop-filter:none; overflow: visible !important; }
       #overlayClose { display:none !important; }
       #ticketActions { display:none !important; }
-      .ticket-card { box-shadow:none; border:1px solid #ddd; background: white; }
+      .ticket-card { box-shadow:none; border:1px solid #ddd; background: white; max-height:none !important; overflow: visible !important; }
       .ticket-body, .ticket-head { color: #111827 !important; background: white !important; }
       .kv .k { color: #374151 !important; }
       .kv .v { color: #111827 !important; }
@@ -502,6 +513,9 @@
   const grid = document.getElementById("grid");
   let currentNumber = null;
 
+  // ✅ FIX 2: bloquear selección mientras carga status
+  let isLoadingStatus = true;
+
   // modo UI
   let payMode = "instant"; // instant/offline
 
@@ -516,6 +530,11 @@
   ];
 
   const btnByNumber = new Map();
+
+  function setGridEnabled(enabled){
+    grid.style.pointerEvents = enabled ? "auto" : "none";
+    grid.style.opacity = enabled ? "1" : "0.65";
+  }
 
   // ========= UI: selector método =========
   const pillInstant = document.getElementById("pill-instant");
@@ -573,6 +592,9 @@
     const msg = document.getElementById("status-msg");
     msg.textContent = "Cargando números disponibles...";
 
+    isLoadingStatus = true;
+    setGridEnabled(false);
+
     try {
       const response = await fetch(API_URL + "?action=get_status", { method: "GET" });
       const data = await response.json();
@@ -618,10 +640,14 @@
       msg.textContent = "Listo ✅ Elige un número disponible.";
     } catch (e) {
       msg.textContent = "No pude cargar el estado. Revisa /api/gs.";
+    } finally {
+      isLoadingStatus = false;
+      setGridEnabled(true);
     }
   }
 
   function selectNumber(num, el) {
+    if (isLoadingStatus) return;
     if (el.classList.contains("sold") || el.classList.contains("reserved")) return;
 
     document.querySelectorAll(".number-btn").forEach(b => b.classList.remove("selected"));
@@ -742,14 +768,9 @@
     shareStatus.textContent = "LISTO";
     ticketLinkInput.value = link;
 
-    // Generar QR
     ticketQR.innerHTML = "";
     if (window.QRCode) {
-      new QRCode(ticketQR, {
-        text: link,
-        width: 150,
-        height: 150
-      });
+      new QRCode(ticketQR, { text: link, width: 150, height: 150 });
     } else {
       ticketQR.innerHTML = `<div class="text-xs text-slate-300">No cargó QRCode</div>`;
     }
@@ -772,10 +793,12 @@
   function showOverlay() {
     overlay.classList.add("show");
     overlay.setAttribute("aria-hidden", "false");
+    document.body.classList.add("modal-open");
   }
   function hideOverlay() {
     overlay.classList.remove("show");
     overlay.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-open");
   }
   overlayClose.addEventListener("click", hideOverlay);
 
@@ -829,7 +852,6 @@
     tDate.textContent = "—";
   }
 
-  // ✅ FIX: ticket permanente NO debe ocultar el overlay
   async function refreshOverlayStatus() {
     showOverlay();
     setBadge("loading", "VERIFICANDO");
@@ -837,30 +859,21 @@
 
     const qs = new URLSearchParams(window.location.search);
 
-    // datos posibles que regresa MP
-    const pago = qs.get("pago"); // success/pending/failure
+    const pago = qs.get("pago");
     const payment_id = qs.get("payment_id") || qs.get("collection_id") || "";
     const status = qs.get("status") || "";
 
-    // ticket permanente
     const ticket_pref = qs.get("ticket") || "";
-
-    // preference_id desde MP (a veces viene) o guardada
     const preference_id_from_qs = qs.get("preference_id") || "";
 
-    // prioridad: ticket=  -> preference_id_from_qs -> localStorage
     const prefFromStorage = localStorage.getItem("last_preference_id") || "";
     const pref = ticket_pref || preference_id_from_qs || prefFromStorage;
 
-    // 1) Pintamos ticket desde sheet (si existe preference)
     if (pref) {
       try {
         const ticket = await loadTicketByPreference(pref);
-        if (ticket.ok) {
-          paintTicketFromSheet(ticket);
-        } else {
-          paintBasicFallback();
-        }
+        if (ticket.ok) paintTicketFromSheet(ticket);
+        else paintBasicFallback();
       } catch {
         paintBasicFallback();
       }
@@ -868,10 +881,8 @@
       paintBasicFallback();
     }
 
-    // Link + QR
     setShareUI(pref);
 
-    // 2) Si tenemos payment_id, verificamos status REAL en MP
     if (payment_id) {
       ovSubtitle.textContent = "Verificando tu pago con Mercado Pago…";
       try {
@@ -915,15 +926,12 @@
       return;
     }
 
-    // 3) Si NO hay payment_id:
-    // - Si vienes con ticket= (boleto permanente) => NO ocultar overlay, solo mostrar el boleto
     if (ticket_pref) {
       setBadge("ok", "BOLETO");
       ovSubtitle.textContent = "Este es tu boleto digital. Si pagaste por transferencia/OXXO, puede tardar en confirmarse; puedes usar “Actualizar estado”.";
       return;
     }
 
-    // - Si vienes de MP sin payment_id (fallback)
     if (pago === "success" || status === "approved") {
       setBadge("ok", "PAGO APROBADO");
       ovSubtitle.textContent = "¡Listo! Si no ves el boleto aún, actualiza en unos segundos.";
@@ -940,7 +948,6 @@
       return;
     }
 
-    // Si no venimos de MP ni de ticket, no mostramos overlay
     hideOverlay();
   }
 
@@ -951,10 +958,12 @@
 
   // ========= INIT =========
   buildGrid();
+
+  setGridEnabled(false);
   cargarStatus();
+
   setInterval(cargarStatus, 20000);
 
-  // Si venimos de MP o de ticket permanente, abrimos overlay
   (async function(){
     const qs = new URLSearchParams(window.location.search);
     if (
@@ -969,7 +978,6 @@
     }
   })();
 
-  // ===== FAQ Toggle =====
   (function initFAQ(){
     const items = document.querySelectorAll(".faq-item");
     items.forEach(item => {
