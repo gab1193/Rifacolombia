@@ -795,11 +795,20 @@
     overlay.setAttribute("aria-hidden", "false");
     document.body.classList.add("modal-open");
   }
-  function hideOverlay() {
-    overlay.classList.remove("show");
-    overlay.setAttribute("aria-hidden", "true");
-    document.body.classList.remove("modal-open");
-  }
+function hideOverlay() {
+  overlay.classList.remove("show");
+  overlay.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("modal-open");
+
+  // ✅ limpiar URL para que no se vuelva a abrir el boleto al recargar
+  const cleanUrl = window.location.origin + window.location.pathname;
+  window.history.replaceState({}, document.title, cleanUrl);
+
+  // (opcional) también limpia storage si quieres:
+  // localStorage.removeItem("last_preference_id");
+  // localStorage.removeItem("last_number");
+}
+
   overlayClose.addEventListener("click", hideOverlay);
 
   btnPrint.addEventListener("click", () => window.print());
