@@ -1,9 +1,17 @@
 module.exports = async (req, res) => {
   const GAS_URL = process.env.GAS_URL;
 
+  // ===== CORS (por si algún navegador lo requiere) =====
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
   if (!GAS_URL) {
-    res.status(500).json({ ok: false, error: "Falta GAS_URL en Vercel" });
-    return;
+    return res.status(500).json({ ok: false, error: "Falta GAS_URL en Vercel" });
   }
 
   try {
@@ -11,7 +19,9 @@ module.exports = async (req, res) => {
     if (req.method === "GET") {
       const url = new URL(GAS_URL);
 
-      for (const [k, v] of Object.entries(req.query || {})) {
+      const q = req.query || {};
+      for (const [k, v] of Object.entries(q)) {
+        if (v === undefined || v === null) continue;
         url.searchParams.set(k, String(v));
       }
 
@@ -19,25 +29,36 @@ module.exports = async (req, res) => {
       const text = await r.text();
 
       res.status(r.status);
-      res.setHeader("Content-Type", "application/json");
+      // Si GAS ya regresa JSON, esto es suficiente
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
       return res.send(text);
     }
 
     // ===== POST: reenvía JSON tal cual =====
     if (req.method === "POST") {
-      const body =
-        typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
+      let bodyObj = {};
+
+      if (typeof req.body === "string") {
+        // por si Vercel lo entrega como string
+        try {
+          bodyObj = JSON.parse(req.body || "{}");
+        } catch {
+          bodyObj = {};
+        }
+      } else {
+        bodyObj = req.body || {};
+      }
 
       const r = await fetch(GAS_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify(bodyObj),
       });
 
       const text = await r.text();
 
       res.status(r.status);
-      res.setHeader("Content-Type", "application/json");
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
       return res.send(text);
     }
 
