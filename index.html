@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
   <link rel="icon" type="image/png" href="/favicon.png">
-<link rel="apple-touch-icon" href="/favicon.png">
-<meta name="theme-color" content="#0f172a">
+  <link rel="apple-touch-icon" href="/favicon.png">
+  <meta name="theme-color" content="#0f172a">
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -48,7 +48,7 @@
       position: relative;
     }
     .available:hover { transform: translateY(-3px) scale(1.1); background: #3b82f6; color: white !important; border-color: #60a5fa; }
-    .selected { background: #ffffff !important; color: #0f172a !important; box-shadow: 0 0 25px rgba(255, 255, 255, 0.5); transform: scale(1.1); border-color: white; }
+    .selected { background: #ffffff !important; color: #0f172a !important; box-shadow: 0 0 25px rgba(255, 255, 255, 0.5); transform: scale(1.08); border-color: white; }
 
     .sold {
       background: rgba(2, 6, 23, 0.7) !important;
@@ -113,7 +113,6 @@
     }
 
     /* ===== Overlay Confirmación ===== */
-    /* ✅ FIX 1: overlay y ticket scrolleable + bloquear fondo */
     body.modal-open { overflow: hidden; height: 100vh; }
 
     .overlay {
@@ -172,6 +171,17 @@
       color: white;
       text-shadow: 0 0 20px rgba(59,130,246,.2);
     }
+    .chip{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,.25);
+      background: rgba(2,6,23,.25);
+      color: rgba(226,232,240,1);
+      font-weight: 800;
+      font-size: 12px;
+      letter-spacing: .06em;
+    }
     .btnx{
       display:inline-flex; align-items:center; justify-content:center;
       padding: 12px 14px;
@@ -210,12 +220,45 @@
       .kv .k { color: #374151 !important; }
       .kv .v { color: #111827 !important; }
       .big-number { color: #111827 !important; text-shadow:none; }
+      .chip { border:1px solid #ddd; background:#f9fafb; color:#111827; }
     }
+
     /* ===== Evento 72h ===== */
     #promoBar{
       background: linear-gradient(to right, rgba(251,191,36,.95), rgba(59,130,246,.85), rgba(239,68,68,.85));
       box-shadow: 0 0 18px rgba(251,191,36,0.18);
       transition: width .9s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* ===== Mini guía (reduce frustración) ===== */
+    .helper-bar{
+      position: sticky;
+      top: 10px;
+      z-index: 50;
+      margin: 0 0 12px 0;
+      border-radius: 18px;
+      border: 1px solid rgba(59,130,246,.25);
+      background: rgba(2,6,23,.35);
+      backdrop-filter: blur(10px);
+      padding: 12px 14px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .helper-left{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+    .helper-step{
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: rgba(226,232,240,1);
+      opacity: .92;
+    }
+    .helper-sub{
+      font-size: 11px;
+      color: rgba(148,163,184,1);
+      font-weight: 700;
     }
   </style>
 </head>
@@ -223,6 +266,7 @@
 <body class="text-slate-200 p-4">
   <div class="max-w-2xl mx-auto text-center mt-10">
     <h1 class="text-5xl font-extrabold mb-4 tracking-tight colombia-title">Rifa Colombia 2026</h1>
+
     <!-- ===== EVENTO 72H (SORTEO EXTRA) ===== -->
     <div id="promo72h" class="glass-card p-5 md:p-6 rounded-[2rem] mb-8 border border-yellow-400/25 shadow-2xl text-left">
       <div class="flex items-start justify-between gap-4">
@@ -290,17 +334,56 @@
     </div>
 
     <div class="glass-card p-8 rounded-[2rem] mb-8 shadow-2xl">
-      <h2 class="text-2xl font-bold mb-1 text-white">1. Selecciona tu número de la suerte</h2>
-      <p class="text-green-400 font-medium mb-6">Solo $100 MXN por oportunidad</p>
+      <div class="flex items-start justify-between gap-4 mb-3">
+        <div class="text-left">
+          <h2 class="text-2xl font-bold mb-1 text-white">1. Selecciona tus números de la suerte</h2>
+          <p class="text-green-400 font-medium">Solo $100 MXN por oportunidad</p>
+        </div>
+        <div class="text-right">
+          <div class="text-[10px] uppercase tracking-[.2em] font-black text-slate-400">Seleccionados</div>
+          <div class="text-white font-black text-2xl"><span id="selCount">0</span></div>
+          <div class="text-slate-400 text-xs font-bold">Total: <span class="text-white">$</span><span id="selTotal" class="text-white">0</span></div>
+        </div>
+      </div>
+
+      <!-- ✅ Mini guía anti-frustración -->
+      <div class="helper-bar text-left">
+        <div class="helper-left">
+          <span class="helper-step">1) Elige</span>
+          <span class="helper-sub">Toca para seleccionar / tocar otra vez para quitar.</span>
+          <span class="helper-sub">Puedes elegir varios en una sola compra.</span>
+          <span class="chip">Máx: <span id="maxSelTxt">10</span></span>
+        </div>
+        <button id="btnClearSel" class="btnx btn-ghost" style="width:auto; padding:10px 12px;">Limpiar</button>
+      </div>
+
       <div id="grid" class="number-grid max-h-[400px] overflow-y-auto p-4 rounded-2xl bg-slate-900/50"></div>
       <p id="status-msg" class="text-xs text-slate-400 mt-4"></p>
     </div>
 
     <div id="checkout-container" class="hidden glass-card p-8 rounded-[2rem] border-2 border-blue-500/50 mb-12 shadow-[0_0_40px_rgba(59,130,246,0.15)] transition-all duration-500">
-      <h3 class="text-xl font-bold mb-6 text-white text-center">
-        ✨ <span id="random-lucky-msg">...</span> Reservando el:
-        <span id="selected-number-display" class="text-blue-400 text-3xl ml-2">--</span>
+      <h3 class="text-xl font-bold mb-4 text-white text-center">
+        ✨ <span id="random-lucky-msg">...</span>
       </h3>
+
+      <!-- ✅ Resumen de selección (multi) -->
+      <div class="glass-card p-4 rounded-2xl mb-6 border border-slate-700/40 bg-slate-900/30 text-left">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <div class="text-xs font-black tracking-[.2em] uppercase text-slate-400">Tu selección</div>
+            <div class="text-white font-black text-lg mt-1">
+              <span id="selected-count-display">0</span> boleto(s) • Total: <span class="text-blue-400">$</span><span id="selected-total-display" class="text-blue-400">0</span>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-[10px] uppercase tracking-[.2em] font-black text-slate-400">Números</div>
+            <div id="selected-number-display" class="text-blue-400 text-lg font-black leading-tight">—</div>
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-400 mt-3 leading-relaxed">
+          Tip: Si eliges <b class="text-white">transferencia/OXXO</b>, tu selección se reserva 24h para que completes el pago.
+        </p>
+      </div>
 
       <div class="space-y-4 mb-8 text-left">
         <div>
@@ -336,7 +419,7 @@
         </div>
 
         <p id="reserve-note" class="text-[11px] text-slate-400 mt-3">
-          ⏳ Tu número queda reservado <b class="text-white">10 minutos</b> mientras realizas el pago inmediato.
+          ⏳ Tu selección queda reservada <b class="text-white">10 minutos</b> mientras realizas el pago inmediato.
         </p>
       </div>
 
@@ -385,7 +468,7 @@
             <span class="faq-ico text-slate-300 font-black">+</span>
           </button>
           <div class="faq-body hidden px-5 pb-5 text-slate-300">
-            Tu número queda <b class="text-white">reservado 24 horas</b>. Cuando Mercado Pago confirme el pago, el estado cambia automáticamente a <b class="text-white">VENDIDO</b>.
+            Tu selección queda <b class="text-white">reservada 24 horas</b>. Cuando Mercado Pago confirme el pago, el estado cambia automáticamente a <b class="text-white">VENDIDO</b>.
           </div>
         </div>
 
@@ -395,7 +478,7 @@
             <span class="faq-ico text-slate-300 font-black">+</span>
           </button>
           <div class="faq-body hidden px-5 pb-5 text-slate-300">
-            Si el pago no se completa dentro del tiempo de reserva, el número vuelve a estar disponible para otra persona.
+            Si el pago no se completa dentro del tiempo de reserva, los números vuelven a estar disponibles para otra persona.
           </div>
         </div>
 
@@ -405,7 +488,7 @@
             <span class="faq-ico text-slate-300 font-black">+</span>
           </button>
           <div class="faq-body hidden px-5 pb-5 text-slate-300">
-            Al finalizar el pago se muestra tu <b class="text-white">boleto digital</b> con tu número, nombre, WhatsApp y folio de pago. Puedes <b class="text-white">guardarlo/imprimirlo</b>.
+            Al finalizar el pago se muestra tu <b class="text-white">boleto digital</b> con tus números, nombre, WhatsApp y folio de pago. Puedes <b class="text-white">guardarlo/imprimirlo</b>.
           </div>
         </div>
 
@@ -415,7 +498,7 @@
             <span class="faq-ico text-slate-300 font-black">+</span>
           </button>
           <div class="faq-body hidden px-5 pb-5 text-slate-300">
-            Sí. Solo repite el proceso y guarda cada boleto digital.
+            Sí. Ahora puedes <b class="text-white">seleccionar varios números</b> y pagarlos <b class="text-white">en una sola compra</b>.
           </div>
         </div>
 
@@ -469,8 +552,8 @@
           <h3 class="text-lg font-black text-white mb-2">Reglas rápidas</h3>
           <ul class="text-slate-300 text-sm leading-relaxed space-y-2">
             <li>• La compra se confirma cuando el pago aparece como <b class="text-white">APROBADO</b> en Mercado Pago.</li>
-            <li>• Para <b class="text-white">transferencia/OXXO</b>, la confirmación puede tardar; tu número queda reservado hasta 24h.</li>
-            <li>• Si el pago no se confirma dentro del periodo de reserva, el número vuelve a estar disponible.</li>
+            <li>• Para <b class="text-white">transferencia/OXXO</b>, la confirmación puede tardar; tu selección queda reservada hasta 24h.</li>
+            <li>• Si el pago no se confirma dentro del periodo de reserva, los números vuelven a estar disponibles.</li>
             <li>• Guarda tu <b class="text-white">boleto digital</b> (captura/impresión) como comprobante.</li>
             <li>• La fecha del sorteo se publicará cuando se alcance el 40% de los boletos vendidos.</li>
           </ul>
@@ -501,9 +584,15 @@
         <div class="mt-4 flex items-center justify-between gap-3">
           <span id="ovBadge" class="badge"><span class="spinner"></span> PROCESANDO</span>
           <div class="text-right">
-            <div class="text-slate-200/70 text-xs uppercase tracking-[.2em] font-black">Número</div>
+            <div class="text-slate-200/70 text-xs uppercase tracking-[.2em] font-black">Boletos</div>
             <div id="ovNumber" class="big-number">--</div>
           </div>
+        </div>
+
+        <!-- ✅ lista corta de números en header -->
+        <div id="ovNumbersRow" class="mt-3 text-left hidden">
+          <div class="text-[10px] uppercase tracking-[.2em] font-black text-slate-200/70">Números</div>
+          <div id="ovNumbers" class="text-white font-black text-sm mt-1 leading-relaxed">—</div>
         </div>
       </div>
 
@@ -514,6 +603,7 @@
           <div class="kv"><div class="k">Estado</div><div id="tStatus" class="v">—</div></div>
           <div class="kv"><div class="k">Pago ID</div><div id="tPayId" class="v">—</div></div>
           <div class="kv"><div class="k">Fecha</div><div id="tDate" class="v">—</div></div>
+          <div class="kv"><div class="k">Total</div><div id="tTotal" class="v">—</div></div>
         </div>
 
         <!-- LINK PERMANENTE + QR -->
@@ -557,7 +647,7 @@
         </div>
 
         <p class="text-[11px] text-slate-400 mt-5 leading-relaxed">
-          Tip: Si pagaste por <b class="text-white">transferencia/OXXO</b>, puede tardar. Tu número queda reservado y cuando Mercado Pago lo confirme, se pondrá <b class="text-white">VENDIDO</b>.
+          Tip: Si pagaste por <b class="text-white">transferencia/OXXO</b>, puede tardar. Tu selección queda reservada y cuando Mercado Pago lo confirme, se pondrá <b class="text-white">VENDIDO</b>.
         </p>
       </div>
     </div>
@@ -573,9 +663,15 @@
 
   // ========= STATE =========
   const grid = document.getElementById("grid");
-  let currentNumber = null;
 
-  // ✅ FIX 2: bloquear selección mientras carga status
+  // ✅ MULTI
+  const PRICE = 100;
+  const MAX_SELECT = 10; // <-- puedes cambiar a 20 si quieres, pero 10 reduce errores
+  document.getElementById("maxSelTxt").textContent = String(MAX_SELECT);
+
+  let selectedNumbers = []; // array de números (enteros)
+
+  // ✅ bloquear selección mientras carga status
   let isLoadingStatus = true;
 
   // modo UI
@@ -618,16 +714,64 @@
     if (mode === "offline") {
       pillOffline.classList.add("active");
       pillInstant.classList.remove("active");
-      reserveNote.innerHTML = `⏳ Tu número queda reservado <b class="text-white">24 horas</b> para que completes transferencia / OXXO.`;
+      reserveNote.innerHTML = `⏳ Tu selección queda reservada <b class="text-white">24 horas</b> para que completes transferencia / OXXO.`;
     } else {
       pillInstant.classList.add("active");
       pillOffline.classList.remove("active");
-      reserveNote.innerHTML = `⏳ Tu número queda reservado <b class="text-white">10 minutos</b> mientras realizas el pago inmediato.`;
+      reserveNote.innerHTML = `⏳ Tu selección queda reservada <b class="text-white">10 minutos</b> mientras realizas el pago inmediato.`;
     }
   }
 
   pillInstant.addEventListener("click", () => setPayMode("instant"));
   pillOffline.addEventListener("click", () => setPayMode("offline"));
+
+  // ========= UI: selección multi =========
+  const selCountEl = document.getElementById("selCount");
+  const selTotalEl = document.getElementById("selTotal");
+  const selectedCountDisplay = document.getElementById("selected-count-display");
+  const selectedTotalDisplay = document.getElementById("selected-total-display");
+  const selectedNumberDisplay = document.getElementById("selected-number-display");
+  const btnClearSel = document.getElementById("btnClearSel");
+
+  function formatNumberList_(arr){
+    const a = [...arr].sort((x,y)=>x-y);
+    // Si son muchos, mostramos bonito
+    return a.join(", ");
+  }
+
+  function updateSelectionUI_(){
+    const count = selectedNumbers.length;
+    const total = count * PRICE;
+
+    selCountEl.textContent = String(count);
+    selTotalEl.textContent = String(total);
+
+    selectedCountDisplay.textContent = String(count);
+    selectedTotalDisplay.textContent = String(total);
+
+    selectedNumberDisplay.textContent = count ? formatNumberList_(selectedNumbers) : "—";
+
+    // checkout visible si hay al menos 1
+    const checkout = document.getElementById("checkout-container");
+    if (count > 0) {
+      checkout.classList.remove("hidden");
+    } else {
+      checkout.classList.add("hidden");
+    }
+  }
+
+  function clearSelection_(){
+    // quitar clase selected de todos
+    for (const n of selectedNumbers) {
+      const btn = btnByNumber.get(Number(n));
+      if (btn) btn.classList.remove("selected");
+    }
+    selectedNumbers = [];
+    resetCheckoutUI_();
+    updateSelectionUI_();
+  }
+
+  btnClearSel.addEventListener("click", clearSelection_);
 
   // ========= UI: grid =========
   function buildGrid() {
@@ -643,7 +787,7 @@
       else if (i % 3 === 1) btn.style.color = "#60a5fa";
       else btn.style.color = "#f87171";
 
-      btn.onclick = () => selectNumber(i, btn);
+      btn.onclick = () => toggleNumber(i, btn);
 
       grid.appendChild(btn);
       btnByNumber.set(i, btn);
@@ -673,10 +817,10 @@
 
       // reset grid
       for (const [num, btn] of btnByNumber.entries()) {
-        btn.classList.remove("sold", "reserved", "selected");
+        btn.classList.remove("sold", "reserved");
         btn.classList.add("available");
         btn.style.pointerEvents = "auto";
-        btn.onclick = () => selectNumber(num, btn);
+        btn.onclick = () => toggleNumber(num, btn);
       }
 
       // vendidos
@@ -687,6 +831,9 @@
         btn.classList.add("sold");
         btn.style.pointerEvents = "none";
         btn.onclick = null;
+
+        // si lo teníamos seleccionado, quitarlo
+        selectedNumbers = selectedNumbers.filter(x => Number(x) !== Number(n));
       });
 
       // reservados
@@ -697,9 +844,19 @@
         btn.classList.add("reserved");
         btn.style.pointerEvents = "none";
         btn.onclick = null;
+
+        // si lo teníamos seleccionado, quitarlo
+        selectedNumbers = selectedNumbers.filter(x => Number(x) !== Number(n));
       });
 
-      msg.textContent = "Listo ✅ Elige un número disponible.";
+      // re-pintar selección (si queda algo)
+      for (const n of selectedNumbers) {
+        const btn = btnByNumber.get(Number(n));
+        if (btn && btn.classList.contains("available")) btn.classList.add("selected");
+      }
+
+      updateSelectionUI_();
+      msg.textContent = "Listo ✅ Elige tus números disponibles.";
     } catch (e) {
       msg.textContent = "No pude cargar el estado. Revisa /api/gs.";
     } finally {
@@ -708,25 +865,39 @@
     }
   }
 
-  function selectNumber(num, el) {
+  function toggleNumber(num, el) {
     if (isLoadingStatus) return;
     if (el.classList.contains("sold") || el.classList.contains("reserved")) return;
 
-    document.querySelectorAll(".number-btn").forEach(b => b.classList.remove("selected"));
+    const exists = selectedNumbers.includes(num);
+
+    // quitar
+    if (exists) {
+      selectedNumbers = selectedNumbers.filter(n => n !== num);
+      el.classList.remove("selected");
+      resetCheckoutUI_();
+      updateSelectionUI_();
+      return;
+    }
+
+    // agregar (con límite)
+    if (selectedNumbers.length >= MAX_SELECT) {
+      alert(`⚠️ Máximo ${MAX_SELECT} números por compra. Puedes pagar y luego comprar más.`);
+      return;
+    }
+
+    selectedNumbers.push(num);
     el.classList.add("selected");
 
-    currentNumber = num;
     resetCheckoutUI_();
-
-    document.getElementById("selected-number-display").innerText = num;
     document.getElementById("random-lucky-msg").innerText =
       luckyMessages[Math.floor(Math.random() * luckyMessages.length)];
 
-    document.getElementById("checkout-container").classList.remove("hidden");
+    updateSelectionUI_();
     document.getElementById("checkout-container").scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
-  // ========= CREAR PAGO =========
+  // ========= CREAR PAGO (single o multi) =========
   async function renderPaymentButton() {
     const name = document.getElementById("user-name").value.trim();
     const phone = document.getElementById("user-phone").value.trim();
@@ -736,10 +907,12 @@
       alert("Mercado Pago no cargó. Recarga la página e intenta de nuevo.");
       return;
     }
-    if (!currentNumber) {
-      alert("Selecciona un número primero.");
+
+    if (!selectedNumbers.length) {
+      alert("Selecciona al menos un número.");
       return;
     }
+
     if (!name || phone.length < 10 || isNaN(phone)) {
       alert("⚠️ WhatsApp válido (solo números, 10 dígitos).");
       return;
@@ -750,17 +923,25 @@
     btnPre.innerText = "Conectando...";
     btnPre.disabled = true;
 
+    // Ordenar selección (bonito y consistente)
+    const numbersSorted = [...selectedNumbers].sort((a,b)=>a-b);
+
     try {
+      const payload = {
+        action: "create_preference",
+        name: name,
+        phone: phone,
+        pay_method: pay_method
+      };
+
+      // ✅ backward-compatible:
+      if (numbersSorted.length === 1) payload.number = numbersSorted[0];
+      else payload.numbers = numbersSorted;
+
       const response = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "create_preference",
-          number: currentNumber,
-          name: name,
-          phone: phone,
-          pay_method: pay_method
-        })
+        body: JSON.stringify(payload)
       });
 
       const preference = await response.json();
@@ -768,9 +949,12 @@
       if (preference.ok && preference.id) {
         btnPre.style.display = "none";
 
-        // Guardamos preference_id en localStorage para mostrar boleto al volver
+        // Guardamos preference_id para mostrar boleto al volver
         localStorage.setItem("last_preference_id", preference.id);
-        localStorage.setItem("last_number", String(currentNumber));
+
+        // Para fallback visual si algo no carga (guardamos lista)
+        localStorage.setItem("last_numbers", JSON.stringify(numbersSorted));
+        localStorage.setItem("last_total", String(numbersSorted.length * PRICE));
 
         const bricksBuilder = mp.bricks();
         await bricksBuilder.create("wallet", "wallet_container", {
@@ -797,12 +981,15 @@
   const ovSubtitle = document.getElementById("ovSubtitle");
   const ovBadge = document.getElementById("ovBadge");
   const ovNumber = document.getElementById("ovNumber");
+  const ovNumbersRow = document.getElementById("ovNumbersRow");
+  const ovNumbers = document.getElementById("ovNumbers");
 
   const tName = document.getElementById("tName");
   const tPhone = document.getElementById("tPhone");
   const tStatus = document.getElementById("tStatus");
   const tPayId = document.getElementById("tPayId");
   const tDate = document.getElementById("tDate");
+  const tTotal = document.getElementById("tTotal");
 
   const btnPrint = document.getElementById("btnPrint");
   const btnRefreshStatus = document.getElementById("btnRefreshStatus");
@@ -814,7 +1001,7 @@
   const shareStatus = document.getElementById("shareStatus");
 
   function buildPermanentTicketLink(preferenceId) {
-    const base = window.location.origin; // siempre el dominio actual (rifacolombia.online)
+    const base = window.location.origin;
     return base + "/?ticket=" + encodeURIComponent(preferenceId);
   }
 
@@ -863,17 +1050,11 @@
     overlay.setAttribute("aria-hidden", "true");
     document.body.classList.remove("modal-open");
 
-    // ✅ limpiar URL para que no se vuelva a abrir el boleto al recargar
     const cleanUrl = window.location.origin + window.location.pathname;
     window.history.replaceState({}, document.title, cleanUrl);
-
-    // (opcional) también limpia storage si quieres:
-    // localStorage.removeItem("last_preference_id");
-    // localStorage.removeItem("last_number");
   }
 
   overlayClose.addEventListener("click", hideOverlay);
-
   btnPrint.addEventListener("click", () => window.print());
 
   function setBadge(type, text) {
@@ -912,25 +1093,69 @@
       await fetch(API_URL + `?action=release_reservation&preference_id=${encodeURIComponent(preferenceId)}`, {
         method: "GET"
       });
-    } catch (e) {
-      // silencioso a propósito
+    } catch (e) {}
+  }
+
+  function getFallbackNumbers_(){
+    try{
+      const raw = localStorage.getItem("last_numbers");
+      if (!raw) return [];
+      const arr = JSON.parse(raw);
+      if (!Array.isArray(arr)) return [];
+      return arr.map(Number).filter(n => !isNaN(n));
+    }catch{
+      return [];
     }
   }
 
   function paintTicketFromSheet(ticket) {
-    ovNumber.textContent = ticket.numero ? String(ticket.numero) : (localStorage.getItem("last_number") || "--");
+    // ✅ nuevo: ticket puede traer numbers[] o numero
+    const nums = Array.isArray(ticket.numbers) ? ticket.numbers.map(Number).filter(n=>!isNaN(n)) : [];
+    const fallbackNums = getFallbackNumbers_();
+
+    const finalNums = nums.length ? nums : (ticket.numero ? [Number(ticket.numero)] : fallbackNums);
+    const qty = ticket.qty != null ? Number(ticket.qty) : finalNums.length;
+    const total = ticket.total != null ? Number(ticket.total) : (qty * PRICE);
+
+    // header
+    if (qty && qty > 1) {
+      ovNumber.textContent = String(qty);
+      ovNumbersRow.classList.remove("hidden");
+      ovNumbers.textContent = finalNums.length ? formatNumberList_(finalNums) : "—";
+    } else {
+      // 1 boleto
+      ovNumber.textContent = finalNums.length ? String(finalNums[0]) : "--";
+      ovNumbersRow.classList.add("hidden");
+      ovNumbers.textContent = "—";
+    }
+
     tName.textContent = ticket.nombre || "—";
     tPhone.textContent = ticket.whatsapp || "—";
-    const st = String(ticket.estado || "—").toUpperCase();
+
+    const st = String(ticket.estado || ticket.status || "—").toUpperCase();
     if (st === "VENDIDO") tStatus.textContent = "✅ VENDIDO (confirmado)";
     else if (st === "RESERVADO") tStatus.textContent = "🕒 RESERVADO (en proceso)";
     else tStatus.textContent = ticket.estado || "—";
+
     tPayId.textContent = ticket.id_pago || "—";
     tDate.textContent = formatDate(ticket.fecha);
+    tTotal.textContent = `$${total || (finalNums.length * PRICE)} MXN`;
   }
 
   function paintBasicFallback() {
-    ovNumber.textContent = localStorage.getItem("last_number") || "--";
+    const fallbackNums = getFallbackNumbers_();
+    if (fallbackNums.length > 1) {
+      ovNumber.textContent = String(fallbackNums.length);
+      ovNumbersRow.classList.remove("hidden");
+      ovNumbers.textContent = formatNumberList_(fallbackNums);
+      tTotal.textContent = `$${fallbackNums.length * PRICE} MXN`;
+    } else {
+      ovNumber.textContent = fallbackNums.length ? String(fallbackNums[0]) : "--";
+      ovNumbersRow.classList.add("hidden");
+      ovNumbers.textContent = "—";
+      tTotal.textContent = "—";
+    }
+
     tName.textContent = "—";
     tPhone.textContent = "—";
     tStatus.textContent = "—";
@@ -977,24 +1202,23 @@
           if (v.status === "approved") {
             setBadge("ok", "PAGO APROBADO");
             ovSubtitle.textContent = "¡Listo! Tu boleto ya está confirmado.";
-            tStatus.textContent = "VENDIDO (aprobado)";
+            tStatus.textContent = "✅ VENDIDO (aprobado)";
             tPayId.textContent = v.id || payment_id;
           } else if (v.status === "pending" || v.status === "in_process") {
             setBadge("pending", "PAGO PENDIENTE");
             ovSubtitle.textContent = "Tu pago está en proceso. Puedes volver después a actualizar.";
-            tStatus.textContent = "RESERVADO / PENDIENTE";
+            tStatus.textContent = "🕒 RESERVADO / PENDIENTE";
             tPayId.textContent = v.id || payment_id;
           } else {
             setBadge("fail", "PAGO NO APROBADO");
             ovSubtitle.textContent = "No se aprobó el pago. Puedes intentar de nuevo.";
-            tStatus.textContent = `NO APROBADO (${v.status})`;
+            tStatus.textContent = `❌ NO APROBADO (${v.status})`;
             tPayId.textContent = v.id || payment_id;
 
-            // ✅ liberar el número si NO fue aprobado (tarjeta)
-            // (y refrescar la grilla para que vuelva a estar disponible)
             await releaseReservationByPreference(pref);
             localStorage.removeItem("last_preference_id");
-            localStorage.removeItem("last_number");
+            localStorage.removeItem("last_numbers");
+            localStorage.removeItem("last_total");
             await cargarStatus();
           }
         } else {
@@ -1020,9 +1244,7 @@
     }
 
     if (ticket_pref) {
-      // Si venimos por link permanente, mostramos estado real del ticket
       const shownStatus = (tStatus.textContent || "").toUpperCase();
-
       if (shownStatus.includes("VENDIDO")) {
         setBadge("ok", "CONFIRMADO");
         ovSubtitle.textContent = "✅ Pago confirmado. Este es tu boleto ya validado.";
@@ -1058,24 +1280,15 @@
   });
 
   // ========= EVENTO 72H (COUNTDOWN) =========
-  // 1) Pon aquí la fecha EXACTA en la que quieres que termine el evento.
-  //    OJO: tu zona es America/Hermosillo (-07:00)
-  //    Formato recomendado: "YYYY-MM-DDTHH:mm:ss-07:00"
   const PROMO_END_ISO = "2025-12-29T18:00:00-07:00"; // <-- CAMBIA ESTA FECHA/HORA
-
-  // 2) Duración total del evento en ms (72 horas)
   const PROMO_TOTAL_MS = 72 * 60 * 60 * 1000;
-
-  // 3) Opcional: si quieres BLOQUEAR COMPRAS al finalizar el evento:
   const PROMO_BLOCK_PURCHASES_WHEN_ENDS = false;
 
-  // elementos
   const promoTime = document.getElementById("promoTime");
   const promoState = document.getElementById("promoState");
   const promoEndsAt = document.getElementById("promoEndsAt");
   const promoBar = document.getElementById("promoBar");
 
-  // Para mostrar fecha bonita
   function formatEndsAt_(iso){
     try{
       const d = new Date(iso);
@@ -1094,7 +1307,6 @@
   }
 
   function setPurchasesEnabled_(enabled){
-    // Bloquea el botón de pagar
     const btnPre = document.getElementById("btn-pre-pago");
     if (btnPre) {
       btnPre.disabled = !enabled;
@@ -1105,32 +1317,15 @@
       }
     }
 
-    // Bloquea inputs
     const nameInput = document.getElementById("user-name");
     const phoneInput = document.getElementById("user-phone");
     if (nameInput) nameInput.disabled = !enabled;
     if (phoneInput) phoneInput.disabled = !enabled;
-
-    // Bloquea selección de números (opcional)
-    if (!enabled) {
-      for (const [num, btn] of btnByNumber.entries()) {
-        btn.style.pointerEvents = "none";
-        btn.style.opacity = "0.8";
-      }
-    } else {
-      // si vuelves a habilitar, el status real lo define cargarStatus()
-      for (const [num, btn] of btnByNumber.entries()) {
-        btn.style.pointerEvents = "auto";
-        btn.style.opacity = "1";
-      }
-    }
   }
 
   function initPromo72h_(){
-    // texto “termina…”
     promoEndsAt.textContent = `⏳ Termina: ${formatEndsAt_(PROMO_END_ISO)} (Hermosillo)`;
 
-    // Si quieres calcular “inicio” como 72h antes del final:
     const end = new Date(PROMO_END_ISO).getTime();
     const start = end - PROMO_TOTAL_MS;
 
@@ -1143,7 +1338,6 @@
         promoState.textContent = "FINALIZADO";
         promoState.classList.remove("text-blue-400");
         promoState.classList.add("text-red-400");
-
         promoBar.style.width = "0%";
 
         if (PROMO_BLOCK_PURCHASES_WHEN_ENDS) {
@@ -1152,14 +1346,11 @@
         return;
       }
 
-      // activo
       promoState.textContent = "ACTIVO";
       promoState.classList.remove("text-red-400");
       promoState.classList.add("text-blue-400");
-
       promoTime.textContent = msToHHMMSS_(left);
 
-      // progreso (de 100% a 0%)
       const progress = Math.min(1, Math.max(0, (end - now) / (end - start)));
       promoBar.style.width = `${Math.round(progress * 100)}%`;
 
