@@ -3,19 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Camerino 🎭 | Rifa Colombia 2026</title>
+  <title>Camerino VIP 🎭 | Rifa Colombia 2026</title>
 
-  <!-- Tailwind (igual que tu index) -->
   <script src="https://cdn.tailwindcss.com"></script>
-
   <meta name="theme-color" content="#0f172a" />
+
   <style>
-    /* Pequeños detalles para que se sienta “VIP” */
     .glass {
       background: rgba(255,255,255,0.06);
       border: 1px solid rgba(255,255,255,0.12);
       backdrop-filter: blur(10px);
     }
+    .fade-in { animation: fadeIn .35s ease-out both; }
+    @keyframes fadeIn { from { opacity:0; transform: translateY(6px);} to {opacity:1; transform: translateY(0);} }
+    .soft-glow { box-shadow: 0 0 0 1px rgba(255,255,255,.06), 0 20px 80px rgba(0,0,0,.45); }
   </style>
 </head>
 
@@ -24,31 +25,38 @@
   <header class="max-w-4xl mx-auto px-4 pt-8 pb-4">
     <div class="flex items-center justify-between">
       <a href="/" class="text-slate-200 hover:text-white text-sm">← Volver a la rifa</a>
-      <span class="text-xs text-slate-400">Acceso exclusivo para participantes</span>
+
+      <div class="flex items-center gap-2">
+        <span class="hidden sm:inline text-xs text-slate-400">Acceso exclusivo</span>
+        <span class="inline-flex items-center gap-2 rounded-full bg-emerald-500/15 border border-emerald-500/25 px-3 py-1 text-xs text-emerald-200">
+          <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+          VIP
+        </span>
+      </div>
     </div>
 
-    <h1 class="mt-4 text-3xl md:text-4xl font-extrabold">
+    <h1 class="mt-5 text-3xl md:text-4xl font-extrabold tracking-tight">
       🎭 Camerino
       <span class="block text-base font-normal text-slate-300 mt-2">
-        Entra con tu número de boleto y los últimos 4 dígitos de tu WhatsApp.
+        Accede con tu boleto y los últimos 4 dígitos de tu WhatsApp.
       </span>
     </h1>
   </header>
 
   <main class="max-w-4xl mx-auto px-4 pb-10">
-    <!-- Card de acceso -->
-    <section class="glass rounded-2xl p-5 md:p-6 shadow-xl">
+    <!-- Acceso -->
+    <section id="accessCard" class="glass soft-glow rounded-2xl p-5 md:p-6">
       <div class="grid md:grid-cols-2 gap-4">
         <div>
           <label class="block text-sm text-slate-300 mb-1">🎟️ Número de boleto</label>
-          <input id="ticketInput" inputmode="numeric" placeholder="Ej: 16"
+          <input id="ticketInput" inputmode="numeric" placeholder="Ej: 17"
             class="w-full rounded-xl bg-slate-900/60 border border-slate-700 px-4 py-3 outline-none focus:border-slate-400"
           />
         </div>
 
         <div>
           <label class="block text-sm text-slate-300 mb-1">📱 Últimos 4 dígitos de tu WhatsApp</label>
-          <input id="last4Input" inputmode="numeric" maxlength="4" placeholder="Ej: 4491"
+          <input id="last4Input" inputmode="numeric" maxlength="4" placeholder="Ej: 5659"
             class="w-full rounded-xl bg-slate-900/60 border border-slate-700 px-4 py-3 outline-none focus:border-slate-400"
           />
         </div>
@@ -61,122 +69,131 @@
         </button>
 
         <a id="waHelp" href="#" class="text-sm text-slate-300 hover:text-white underline underline-offset-4">
-          ¿Se te complica? Pide ayuda por WhatsApp
+          ¿Necesitas ayuda por WhatsApp?
         </a>
       </div>
 
       <div id="statusBox" class="mt-4 hidden rounded-xl p-4 text-sm"></div>
 
       <p class="mt-3 text-xs text-slate-400 leading-relaxed">
-        Por seguridad, solo pedimos el número de tu boleto y los últimos 4 dígitos de tu WhatsApp.
-        Si no recuerdas el número, revisa la captura de tu boleto.
+        Este acceso se valida con el registro del boleto. Si tu compra fue reciente, espera un momento e intenta de nuevo.
       </p>
     </section>
 
-    <!-- Zona desbloqueada -->
-    <section id="vipArea" class="hidden mt-6 space-y-6">
+    <!-- VIP -->
+    <section id="vipArea" class="hidden mt-6 space-y-6 fade-in">
       <!-- Bienvenida -->
-      <div class="glass rounded-2xl p-5 md:p-6 shadow-xl">
+      <div class="glass soft-glow rounded-2xl p-5 md:p-6">
         <p class="text-sm text-slate-300">Acceso verificado ✅</p>
         <h2 class="text-2xl md:text-3xl font-bold mt-1">
           Bienvenido, <span id="vipName" class="text-white">Participante</span>
         </h2>
         <p class="mt-2 text-slate-300">
-          🎟️ Tu boleto: <span id="vipTicket" class="font-semibold text-white">#</span>
+          🎟️ Boleto: <span id="vipTicket" class="font-semibold text-white">#</span>
+          <span id="vipMask" class="ml-2 text-xs text-slate-400"></span>
         </p>
       </div>
 
-      <!-- Canción exclusiva -->
-      <div class="glass rounded-2xl p-5 md:p-6 shadow-xl">
-        <h3 class="text-xl font-bold">🎧 Canción inédita (solo Camerino)</h3>
-        <p class="mt-2 text-slate-300 leading-relaxed">
-          Esta canción no está en redes ni en plataformas. La guardé porque no era para cualquiera.
-          Si estás aquí, ya eres parte.
+      <!-- Canción -->
+      <div class="glass soft-glow rounded-2xl p-5 md:p-6">
+        <div class="flex items-center justify-between gap-3">
+          <h3 class="text-xl font-bold">🎧 Depto — Inédita (solo Camerino)</h3>
+          <span class="text-xs text-slate-400">Acceso VIP</span>
+        </div>
+
+        <p class="mt-2 text-slate-300 leading-relaxed" id="songIntro">
+          Gracias por estar dentro. Aquí tienes un adelanto que no está en plataformas: “Depto”.
         </p>
 
         <div class="mt-4 rounded-2xl bg-slate-900/60 border border-slate-800 p-4">
-          <p class="text-xs text-slate-400 mb-2">Tip: si estás en datos móviles, dale play cuando estés listo.</p>
-          <audio id="audioPlayer" controls preload="none" class="w-full">
-            <!-- src se asigna en JS al validar -->
-          </audio>
+          <p class="text-xs text-slate-400 mb-2">Dale play cuando estés listo.</p>
+          <audio id="audioPlayer" controls preload="none" class="w-full"></audio>
         </div>
 
-        <div class="mt-3 text-xs text-slate-400">
-          Nota: el audio se carga en modo “stream” (preload none) para no pesar tu página.
+        <!-- Historia -->
+        <div class="mt-5 rounded-2xl bg-slate-900/40 border border-slate-800 p-4">
+          <h4 class="font-semibold text-white">La historia detrás de “Depto”</h4>
+          <p class="mt-2 text-sm text-slate-300 leading-relaxed">
+            “Depto” nació hace dos años, en esa etapa donde un lugar puede sentirse como refugio… o como eco.
+            Es una canción sobre lo que se queda cuando alguien se va: el silencio, las rutinas rotas, los detalles
+            que antes eran normales y de pronto pesan.
+          </p>
+          <p class="mt-2 text-sm text-slate-300 leading-relaxed">
+            La escribí 100% yo y la produjimos entre Gatu y yo. La guardé porque no era para cualquiera:
+            es de esas rolas que se escuchan cuando ya entiendes el mood, cuando ya viviste algo parecido.
+            Si estás aquí, ya eres parte del círculo.
+          </p>
+          <p class="mt-2 text-xs text-slate-400">
+            Autor: Raúl • Producción: Raúl &amp; Gatu • Título: “Depto”
+          </p>
         </div>
       </div>
 
-      <!-- Comunidad / transparencia ligera -->
-      <div class="glass rounded-2xl p-5 md:p-6 shadow-xl">
-        <h3 class="text-xl font-bold">🫶 Comunidad</h3>
+      <!-- Comunidad -->
+      <div class="glass soft-glow rounded-2xl p-5 md:p-6">
+        <h3 class="text-xl font-bold">🫶 Comunidad VIP</h3>
         <p class="mt-2 text-slate-300">
-          Este proyecto se siente más fuerte cuando se vuelve de todos los que ya están dentro.
+          Esto se pone bueno cuando los que ya están dentro ayudan a que se llene más rápido.
         </p>
 
         <div class="mt-4 grid md:grid-cols-2 gap-4">
           <div class="rounded-2xl bg-slate-900/60 border border-slate-800 p-4">
-            <p class="text-sm text-slate-300">📌 ¿Qué hay aquí?</p>
+            <p class="text-sm text-slate-300">📌 Aquí dentro</p>
             <ul class="mt-2 text-sm text-slate-200 list-disc list-inside space-y-1">
-              <li>Acceso a contenido exclusivo</li>
-              <li>Actualizaciones y backstage</li>
-              <li>Dinámicas para la comunidad</li>
+              <li>Contenido exclusivo</li>
+              <li>Backstage y actualizaciones</li>
+              <li>Dinámicas especiales</li>
             </ul>
           </div>
 
           <div class="rounded-2xl bg-slate-900/60 border border-slate-800 p-4">
-            <p class="text-sm text-slate-300">🚀 Próximamente</p>
+            <p class="text-sm text-slate-300">🚀 Lo que viene</p>
             <ul class="mt-2 text-sm text-slate-200 list-disc list-inside space-y-1">
-              <li>Votaciones (extras del premio)</li>
-              <li>Lista VIP (menciones)</li>
-              <li>Misiones para compartir</li>
+              <li>Menciones VIP</li>
+              <li>Dinámicas y extras</li>
+              <li>Sorpresas para participantes</li>
             </ul>
           </div>
         </div>
       </div>
 
-      <!-- Botón para compartir (opcional, útil) -->
-      <div class="glass rounded-2xl p-5 md:p-6 shadow-xl">
-        <h3 class="text-xl font-bold">📣 Ayúdame a cerrar la rifa</h3>
+      <!-- Compartir -->
+      <div class="glass soft-glow rounded-2xl p-5 md:p-6">
+        <h3 class="text-xl font-bold">📣 Comparte la rifa</h3>
         <p class="mt-2 text-slate-300">
-          Si alguien te pregunta si es real, manda el link principal. Entre más rápido se llene, más rápido se juega.
+          Entre más rápido se llene, más rápido se juega. Si alguien te pregunta si es real, mándale el link.
         </p>
         <div class="mt-4 flex flex-col md:flex-row gap-3">
           <button id="btnCopy"
             class="rounded-xl bg-slate-100 hover:bg-white text-slate-950 font-semibold px-5 py-3 transition">
-            Copiar link de la rifa
+            Copiar link
           </button>
           <a id="btnShareWa" href="#"
             class="rounded-xl bg-green-500 hover:bg-green-400 text-slate-950 font-semibold px-5 py-3 transition text-center">
             Compartir por WhatsApp
           </a>
         </div>
+
+        <div id="shareHint" class="mt-3 text-xs text-slate-400"></div>
       </div>
     </section>
   </main>
 
   <footer class="max-w-4xl mx-auto px-4 pb-10 text-center text-xs text-slate-500">
-    © Rifa Colombia 2026 — Camerino
+    © Rifa Colombia 2026 — Camerino VIP
   </footer>
 
   <script>
-    // =========================
-    // CONFIG: CAMBIA ESTO
-    // =========================
-
-    // 1) Pega aquí la URL de tu WebApp desplegada de Apps Script (termina en /exec)
-    const APPS_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxOWAnHZsiWJY1LILgOlssWIeOWF-9gQWl7kwG_fafcMBK6ljl8BtlPJnr3goYlDlTP/exec";
-
-    // 2) URL del audio (mp3 recomendado). Ejemplo si lo subes a tu hosting:
-    // const AUDIO_URL = "/assets/camerino-cancion.mp3";
+    // ====== CONFIG CLIENTE ======
     const AUDIO_URL = "/Depto.mp3";
+    const SUPPORT_WA_NUMBER = "52XXXXXXXXXX"; // Ej: "526311234567" (si no lo pones, se oculta el link)
 
-    // Si quieres soporte por WhatsApp, cambia el número:
-    const SUPPORT_WA_NUMBER = "52XXXXXXXXXX"; // Ej: "526311234567"
-
-    // =========================
-    // Helpers UI
-    // =========================
+    // ====== Helpers ======
     const $ = (id) => document.getElementById(id);
+
+    function onlyDigits(value) {
+      return (value || "").toString().replace(/\D/g, "");
+    }
 
     function showStatus(type, message) {
       const box = $("statusBox");
@@ -199,42 +216,67 @@
       box.innerHTML = "";
     }
 
-    function onlyDigits(value) {
-      return (value || "").toString().replace(/\D/g, "");
+    function hideAccessForm() {
+      $("accessCard").classList.add("hidden");
     }
 
-    // =========================
-    // Recupera query params (por si les mandas link con ticket/last4 ya llenos)
-    // =========================
+    // ====== Cargar GAS_URL desde Vercel env via /api/config ======
+    async function getGasUrl() {
+      try {
+        const res = await fetch("/api/config", { cache: "no-store" });
+        if (!res.ok) throw new Error("config not ok");
+        const json = await res.json();
+        const gas = (json?.gas_url || "").trim();
+        return gas;
+      } catch {
+        return "";
+      }
+    }
+
+    // ====== Validación contra Apps Script ======
+    async function verifyCamerino(gasUrl, numero, last4) {
+      const url = new URL(gasUrl);
+      url.searchParams.set("action", "verify_camerino");
+      url.searchParams.set("numero", numero);
+      url.searchParams.set("last4", last4);
+      url.searchParams.set("_", Date.now().toString()); // anti-cache
+
+      const res = await fetch(url.toString(), { method: "GET" });
+      if (!res.ok) throw new Error("No se pudo verificar en este momento.");
+      return await res.json();
+    }
+
+    // ====== Prefill por URL opcional ======
     const params = new URLSearchParams(window.location.search);
     const preTicket = params.get("ticket");
     const preLast4 = params.get("last4");
     if (preTicket) $("ticketInput").value = preTicket;
     if (preLast4) $("last4Input").value = preLast4;
 
-    // =========================
-    // WhatsApp soporte
-    // =========================
-    $("waHelp").addEventListener("click", (e) => {
-      e.preventDefault();
-      const t = onlyDigits($("ticketInput").value);
-      const l4 = onlyDigits($("last4Input").value).slice(-4);
-      const msg = encodeURIComponent(
-        `Hola, necesito recuperar mi acceso al Camerino.\nBoleto: ${t || "(no lo recuerdo)"}\nWhatsApp termina en: ${l4 || "(no lo recuerdo)"}`
-      );
-      window.open(`https://wa.me/${SUPPORT_WA_NUMBER}?text=${msg}`, "_blank");
-    });
+    // ====== WhatsApp soporte ======
+    const waHelp = $("waHelp");
+    if (!SUPPORT_WA_NUMBER || SUPPORT_WA_NUMBER.includes("X")) {
+      waHelp.classList.add("hidden");
+    } else {
+      waHelp.addEventListener("click", (e) => {
+        e.preventDefault();
+        const t = onlyDigits($("ticketInput").value);
+        const l4 = onlyDigits($("last4Input").value).slice(-4);
+        const msg = encodeURIComponent(
+          `Hola, necesito ayuda con el acceso al Camerino.\nBoleto: ${t || "(no lo recuerdo)"}\nWhatsApp termina en: ${l4 || "(no lo recuerdo)"}`
+        );
+        window.open(`https://wa.me/${SUPPORT_WA_NUMBER}?text=${msg}`, "_blank");
+      });
+    }
 
-    // =========================
-    // Botones share
-    // =========================
+    // ====== Share ======
     $("btnCopy")?.addEventListener("click", async () => {
       try {
         await navigator.clipboard.writeText("https://rifacolombia.online");
-        showStatus("ok", "✅ Listo. Se copió el link de la rifa.");
-        setTimeout(hideStatus, 2500);
+        $("shareHint").textContent = "✅ Link copiado.";
+        setTimeout(() => $("shareHint").textContent = "", 2200);
       } catch {
-        showStatus("warn", "No pude copiar automáticamente. Copia manualmente: https://rifacolombia.online");
+        $("shareHint").textContent = "Copia manualmente: https://rifacolombia.online";
       }
     });
 
@@ -244,72 +286,53 @@
       window.open(`https://wa.me/?text=${text}`, "_blank");
     });
 
-    // =========================
-    // VALIDACIÓN contra Apps Script
-    // =========================
-    async function validateAccess(ticket, last4) {
-      const url = new URL(APPS_SCRIPT_WEBAPP_URL);
-      url.searchParams.set("mode", "auth");
-      url.searchParams.set("ticket", ticket);
-      url.searchParams.set("last4", last4);
-
-      const res = await fetch(url.toString(), { method: "GET" });
-      if (!res.ok) throw new Error("Respuesta inválida del servidor.");
-      return await res.json();
-    }
-
-    // =========================
-    // Entrar al Camerino
-    // =========================
+    // ====== Enter ======
     $("btnEnter").addEventListener("click", async () => {
       hideStatus();
 
-      let ticket = onlyDigits($("ticketInput").value);
-      let last4 = onlyDigits($("last4Input").value).slice(-4);
+      const ticket = onlyDigits($("ticketInput").value);
+      const last4 = onlyDigits($("last4Input").value).slice(-4);
 
       if (!ticket) {
-        showStatus("warn", "⚠️ Escribe tu <b>número de boleto</b> (ej: 16).");
+        showStatus("warn", "⚠️ Escribe tu <b>número de boleto</b>.");
         return;
       }
       if (!last4 || last4.length !== 4) {
-        showStatus("warn", "⚠️ Escribe los <b>últimos 4 dígitos</b> de tu WhatsApp (ej: 4491).");
+        showStatus("warn", "⚠️ Escribe los <b>últimos 4 dígitos</b> de tu WhatsApp.");
         return;
-      }
-      if (!APPS_SCRIPT_WEBAPP_URL || APPS_SCRIPT_WEBAPP_URL.includes("PEGA_AQUI")) {
-        showStatus("error", "❌ Falta configurar la URL de Apps Script en el archivo (APPS_SCRIPT_WEBAPP_URL).");
-        return;
-      }
-      if (!AUDIO_URL || AUDIO_URL.includes("PEGA_AQUI")) {
-        showStatus("warn", "⚠️ Falta configurar AUDIO_URL. Aun así, validaremos tu acceso.");
       }
 
       $("btnEnter").disabled = true;
       $("btnEnter").innerText = "Validando…";
 
       try {
-        const data = await validateAccess(ticket, last4);
-
-        if (!data || data.ok !== true) {
-          showStatus("error", "❌ No pude verificar esos datos. Revisa tu boleto y vuelve a intentar. Si se te complica, usa el botón de WhatsApp.");
+        const gasUrl = await getGasUrl();
+        if (!gasUrl || !gasUrl.includes("/exec")) {
+          showStatus("error", "❌ Configuración no disponible. Intenta de nuevo en un momento.");
           return;
         }
 
-        // Desbloquear
-        $("vipArea").classList.remove("hidden");
-        $("vipName").textContent = data.name || "Participante";
-        $("vipTicket").textContent = `#${data.ticket || ticket}`;
+        const data = await verifyCamerino(gasUrl, ticket, last4);
 
-        // Asignar audio SOLO después de validar
-        if (AUDIO_URL && !AUDIO_URL.includes("PEGA_AQUI")) {
-          const player = $("audioPlayer");
-          player.src = AUDIO_URL;
+        if (!data?.ok) {
+          showStatus("error", `❌ ${data?.error || "No pude verificar esos datos."}`);
+          return;
         }
 
-        showStatus("ok", "✅ Acceso verificado. Bienvenido al Camerino 🎭");
-        // Scroll suave a la zona VIP
-        setTimeout(() => $("vipArea").scrollIntoView({ behavior: "smooth", block: "start" }), 250);
+        // Unlock VIP
+        $("vipArea").classList.remove("hidden");
+        $("vipName").textContent = data.nombre || "Participante";
+        $("vipTicket").textContent = `#${data.numero ?? ticket}`;
+        $("vipMask").textContent = data.whatsapp_mask ? `(${data.whatsapp_mask})` : "";
+
+        // Audio (solo después de validar)
+        const player = $("audioPlayer");
+        player.src = AUDIO_URL;
+
+        hideAccessForm();
+        setTimeout(() => $("vipArea").scrollIntoView({ behavior: "smooth", block: "start" }), 120);
       } catch (err) {
-        showStatus("error", `❌ Error al validar. ${err?.message || "Intenta de nuevo en un momento."}`);
+        showStatus("error", `❌ ${err?.message || "Error al validar. Intenta de nuevo."}`);
       } finally {
         $("btnEnter").disabled = false;
         $("btnEnter").innerText = "Entrar al Camerino";
@@ -318,4 +341,3 @@
   </script>
 </body>
 </html>
-
