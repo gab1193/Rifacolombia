@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Camerino 🎭 | Rifa Colombia 2026</title>
+
+  <!-- Tailwind (igual que tu index) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <meta name="theme-color" content="#0f172a" />
+  <style>
+    /* Pequeños detalles para que se sienta “VIP” */
+    .glass {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(10px);
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-slate-950 text-slate-100">
+  <!-- Header -->
+  <header class="max-w-4xl mx-auto px-4 pt-8 pb-4">
+    <div class="flex items-center justify-between">
+      <a href="/" class="text-slate-200 hover:text-white text-sm">← Volver a la rifa</a>
+      <span class="text-xs text-slate-400">Acceso exclusivo para participantes</span>
+    </div>
+
+    <h1 class="mt-4 text-3xl md:text-4xl font-extrabold">
+      🎭 Camerino
+      <span class="block text-base font-normal text-slate-300 mt-2">
+        Entra con tu número de boleto y los últimos 4 dígitos de tu WhatsApp.
+      </span>
+    </h1>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-4 pb-10">
+    <!-- Card de acceso -->
+    <section class="glass rounded-2xl p-5 md:p-6 shadow-xl">
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm text-slate-300 mb-1">🎟️ Número de boleto</label>
+          <input id="ticketInput" inputmode="numeric" placeholder="Ej: 16"
+            class="w-full rounded-xl bg-slate-900/60 border border-slate-700 px-4 py-3 outline-none focus:border-slate-400"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm text-slate-300 mb-1">📱 Últimos 4 dígitos de tu WhatsApp</label>
+          <input id="last4Input" inputmode="numeric" maxlength="4" placeholder="Ej: 4491"
+            class="w-full rounded-xl bg-slate-900/60 border border-slate-700 px-4 py-3 outline-none focus:border-slate-400"
+          />
+        </div>
+      </div>
+
+      <div class="mt-4 flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
+        <button id="btnEnter"
+          class="rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold px-5 py-3 transition">
+          Entrar al Camerino
+        </button>
+
+        <a id="waHelp" href="#" class="text-sm text-slate-300 hover:text-white underline underline-offset-4">
+          ¿Se te complica? Pide ayuda por WhatsApp
+        </a>
+      </div>
+
+      <div id="statusBox" class="mt-4 hidden rounded-xl p-4 text-sm"></div>
+
+      <p class="mt-3 text-xs text-slate-400 leading-relaxed">
+        Por seguridad, solo pedimos el número de tu boleto y los últimos 4 dígitos de tu WhatsApp.
+        Si no recuerdas el número, revisa la captura de tu boleto.
+      </p>
+    </section>
+
+    <!-- Zona desbloqueada -->
+    <section id="vipArea" class="hidden mt-6 space-y-6">
+      <!-- Bienvenida -->
+      <div class="glass rounded-2xl p-5 md:p-6 shadow-xl">
+        <p class="text-sm text-slate-300">Acceso verificado ✅</p>
+        <h2 class="text-2xl md:text-3xl font-bold mt-1">
+          Bienvenido, <span id="vipName" class="text-white">Participante</span>
+        </h2>
+        <p class="mt-2 text-slate-300">
+          🎟️ Tu boleto: <span id="vipTicket" class="font-semibold text-white">#</span>
+        </p>
+      </div>
+
+      <!-- Canción exclusiva -->
+      <div class="glass rounded-2xl p-5 md:p-6 shadow-xl">
+        <h3 class="text-xl font-bold">🎧 Canción inédita (solo Camerino)</h3>
+        <p class="mt-2 text-slate-300 leading-relaxed">
+          Esta canción no está en redes ni en plataformas. La guardé porque no era para cualquiera.
+          Si estás aquí, ya eres parte.
+        </p>
+
+        <div class="mt-4 rounded-2xl bg-slate-900/60 border border-slate-800 p-4">
+          <p class="text-xs text-slate-400 mb-2">Tip: si estás en datos móviles, dale play cuando estés listo.</p>
+          <audio id="audioPlayer" controls preload="none" class="w-full">
+            <!-- src se asigna en JS al validar -->
+          </audio>
+        </div>
+
+        <div class="mt-3 text-xs text-slate-400">
+          Nota: el audio se carga en modo “stream” (preload none) para no pesar tu página.
+        </div>
+      </div>
+
+      <!-- Comunidad / transparencia ligera -->
+      <div class="glass rounded-2xl p-5 md:p-6 shadow-xl">
+        <h3 class="text-xl font-bold">🫶 Comunidad</h3>
+        <p class="mt-2 text-slate-300">
+          Este proyecto se siente más fuerte cuando se vuelve de todos los que ya están dentro.
+        </p>
+
+        <div class="mt-4 grid md:grid-cols-2 gap-4">
+          <div class="rounded-2xl bg-slate-900/60 border border-slate-800 p-4">
+            <p class="text-sm text-slate-300">📌 ¿Qué hay aquí?</p>
+            <ul class="mt-2 text-sm text-slate-200 list-disc list-inside space-y-1">
+              <li>Acceso a contenido exclusivo</li>
+              <li>Actualizaciones y backstage</li>
+              <li>Dinámicas para la comunidad</li>
+            </ul>
+          </div>
+
+          <div class="rounded-2xl bg-slate-900/60 border border-slate-800 p-4">
+            <p class="text-sm text-slate-300">🚀 Próximamente</p>
+            <ul class="mt-2 text-sm text-slate-200 list-disc list-inside space-y-1">
+              <li>Votaciones (extras del premio)</li>
+              <li>Lista VIP (menciones)</li>
+              <li>Misiones para compartir</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botón para compartir (opcional, útil) -->
+      <div class="glass rounded-2xl p-5 md:p-6 shadow-xl">
+        <h3 class="text-xl font-bold">📣 Ayúdame a cerrar la rifa</h3>
+        <p class="mt-2 text-slate-300">
+          Si alguien te pregunta si es real, manda el link principal. Entre más rápido se llene, más rápido se juega.
+        </p>
+        <div class="mt-4 flex flex-col md:flex-row gap-3">
+          <button id="btnCopy"
+            class="rounded-xl bg-slate-100 hover:bg-white text-slate-950 font-semibold px-5 py-3 transition">
+            Copiar link de la rifa
+          </button>
+          <a id="btnShareWa" href="#"
+            class="rounded-xl bg-green-500 hover:bg-green-400 text-slate-950 font-semibold px-5 py-3 transition text-center">
+            Compartir por WhatsApp
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="max-w-4xl mx-auto px-4 pb-10 text-center text-xs text-slate-500">
+    © Rifa Colombia 2026 — Camerino
+  </footer>
+
+  <script>
+    // =========================
+    // CONFIG: CAMBIA ESTO
+    // =========================
+
+    // 1) Pega aquí la URL de tu WebApp desplegada de Apps Script (termina en /exec)
+    const APPS_SCRIPT_WEBAPP_URL = "PEGA_AQUI_TU_WEBAPP_EXEC_URL";
+
+    // 2) URL del audio (mp3 recomendado). Ejemplo si lo subes a tu hosting:
+    // const AUDIO_URL = "/assets/camerino-cancion.mp3";
+    const AUDIO_URL = "PEGA_AQUI_URL_DEL_AUDIO_MP3";
+
+    // Si quieres soporte por WhatsApp, cambia el número:
+    const SUPPORT_WA_NUMBER = "52XXXXXXXXXX"; // Ej: "526311234567"
+
+    // =========================
+    // Helpers UI
+    // =========================
+    const $ = (id) => document.getElementById(id);
+
+    function showStatus(type, message) {
+      const box = $("statusBox");
+      box.classList.remove("hidden");
+      box.className = "mt-4 rounded-xl p-4 text-sm";
+
+      if (type === "ok") {
+        box.classList.add("bg-emerald-500/15", "border", "border-emerald-500/30", "text-emerald-200");
+      } else if (type === "warn") {
+        box.classList.add("bg-amber-500/15", "border", "border-amber-500/30", "text-amber-200");
+      } else {
+        box.classList.add("bg-red-500/15", "border", "border-red-500/30", "text-red-200");
+      }
+      box.innerHTML = message;
+    }
+
+    function hideStatus() {
+      const box = $("statusBox");
+      box.classList.add("hidden");
+      box.innerHTML = "";
+    }
+
+    function onlyDigits(value) {
+      return (value || "").toString().replace(/\D/g, "");
+    }
+
+    // =========================
+    // Recupera query params (por si les mandas link con ticket/last4 ya llenos)
+    // =========================
+    const params = new URLSearchParams(window.location.search);
+    const preTicket = params.get("ticket");
+    const preLast4 = params.get("last4");
+    if (preTicket) $("ticketInput").value = preTicket;
+    if (preLast4) $("last4Input").value = preLast4;
+
+    // =========================
+    // WhatsApp soporte
+    // =========================
+    $("waHelp").addEventListener("click", (e) => {
+      e.preventDefault();
+      const t = onlyDigits($("ticketInput").value);
+      const l4 = onlyDigits($("last4Input").value).slice(-4);
+      const msg = encodeURIComponent(
+        `Hola, necesito recuperar mi acceso al Camerino.\nBoleto: ${t || "(no lo recuerdo)"}\nWhatsApp termina en: ${l4 || "(no lo recuerdo)"}`
+      );
+      window.open(`https://wa.me/${SUPPORT_WA_NUMBER}?text=${msg}`, "_blank");
+    });
+
+    // =========================
+    // Botones share
+    // =========================
+    $("btnCopy")?.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText("https://rifacolombia.online");
+        showStatus("ok", "✅ Listo. Se copió el link de la rifa.");
+        setTimeout(hideStatus, 2500);
+      } catch {
+        showStatus("warn", "No pude copiar automáticamente. Copia manualmente: https://rifacolombia.online");
+      }
+    });
+
+    $("btnShareWa")?.addEventListener("click", (e) => {
+      e.preventDefault();
+      const text = encodeURIComponent("Te paso la rifa 👇\nhttps://rifacolombia.online");
+      window.open(`https://wa.me/?text=${text}`, "_blank");
+    });
+
+    // =========================
+    // VALIDACIÓN contra Apps Script
+    // =========================
+    async function validateAccess(ticket, last4) {
+      const url = new URL(APPS_SCRIPT_WEBAPP_URL);
+      url.searchParams.set("mode", "auth");
+      url.searchParams.set("ticket", ticket);
+      url.searchParams.set("last4", last4);
+
+      const res = await fetch(url.toString(), { method: "GET" });
+      if (!res.ok) throw new Error("Respuesta inválida del servidor.");
+      return await res.json();
+    }
+
+    // =========================
+    // Entrar al Camerino
+    // =========================
+    $("btnEnter").addEventListener("click", async () => {
+      hideStatus();
+
+      let ticket = onlyDigits($("ticketInput").value);
+      let last4 = onlyDigits($("last4Input").value).slice(-4);
+
+      if (!ticket) {
+        showStatus("warn", "⚠️ Escribe tu <b>número de boleto</b> (ej: 16).");
+        return;
+      }
+      if (!last4 || last4.length !== 4) {
+        showStatus("warn", "⚠️ Escribe los <b>últimos 4 dígitos</b> de tu WhatsApp (ej: 4491).");
+        return;
+      }
+      if (!APPS_SCRIPT_WEBAPP_URL || APPS_SCRIPT_WEBAPP_URL.includes("PEGA_AQUI")) {
+        showStatus("error", "❌ Falta configurar la URL de Apps Script en el archivo (APPS_SCRIPT_WEBAPP_URL).");
+        return;
+      }
+      if (!AUDIO_URL || AUDIO_URL.includes("PEGA_AQUI")) {
+        showStatus("warn", "⚠️ Falta configurar AUDIO_URL. Aun así, validaremos tu acceso.");
+      }
+
+      $("btnEnter").disabled = true;
+      $("btnEnter").innerText = "Validando…";
+
+      try {
+        const data = await validateAccess(ticket, last4);
+
+        if (!data || data.ok !== true) {
+          showStatus("error", "❌ No pude verificar esos datos. Revisa tu boleto y vuelve a intentar. Si se te complica, usa el botón de WhatsApp.");
+          return;
+        }
+
+        // Desbloquear
+        $("vipArea").classList.remove("hidden");
+        $("vipName").textContent = data.name || "Participante";
+        $("vipTicket").textContent = `#${data.ticket || ticket}`;
+
+        // Asignar audio SOLO después de validar
+        if (AUDIO_URL && !AUDIO_URL.includes("PEGA_AQUI")) {
+          const player = $("audioPlayer");
+          player.src = AUDIO_URL;
+        }
+
+        showStatus("ok", "✅ Acceso verificado. Bienvenido al Camerino 🎭");
+        // Scroll suave a la zona VIP
+        setTimeout(() => $("vipArea").scrollIntoView({ behavior: "smooth", block: "start" }), 250);
+      } catch (err) {
+        showStatus("error", `❌ Error al validar. ${err?.message || "Intenta de nuevo en un momento."}`);
+      } finally {
+        $("btnEnter").disabled = false;
+        $("btnEnter").innerText = "Entrar al Camerino";
+      }
+    });
+  </script>
+</body>
+</html>
