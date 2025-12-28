@@ -260,10 +260,80 @@
       color: rgba(148,163,184,1);
       font-weight: 700;
     }
+
+    /* ===== BOTÓN CAMERINO (VIP) ===== */
+    .vip-fab{
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      z-index: 9998; /* debajo del overlay (9999) */
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      user-select: none;
+    }
+    .vip-btn{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding: 12px 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(2,6,23,.45);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 12px 40px rgba(0,0,0,.35);
+      transition: transform .2s, border-color .2s, filter .2s;
+      text-decoration: none;
+    }
+    .vip-btn:hover{
+      transform: translateY(-2px);
+      border-color: rgba(251,191,36,.45);
+      filter: brightness(1.06);
+    }
+    .vip-title{
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-size: 12px;
+      color: #fff;
+      white-space: nowrap;
+    }
+    .vip-pill{
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(251,191,36,.95), rgba(59,130,246,.85), rgba(239,68,68,.85));
+      color: rgba(2,6,23,1);
+      box-shadow: 0 0 18px rgba(251,191,36,.15);
+      white-space: nowrap;
+    }
+    .vip-sub{
+      font-size: 11px;
+      font-weight: 700;
+      color: rgba(226,232,240,.75);
+      line-height: 1.1;
+      max-width: 210px;
+      text-align: right;
+    }
   </style>
 </head>
 
 <body class="text-slate-200 p-4">
+
+  <!-- ===== BOTÓN VIP CAMERINO (TOP RIGHT) ===== -->
+  <div class="vip-fab" aria-label="Acceso VIP">
+    <a class="vip-btn" href="camerino.html" title="Entrar al Camerino">
+      <span class="vip-pill">VIP</span>
+      <span class="vip-title">Camerino</span>
+      <span aria-hidden="true" style="font-size:14px; opacity:.9;">🎭</span>
+    </a>
+    <div class="vip-sub">Contenido premium para compradores. Entra con tu boleto ✅</div>
+  </div>
+
   <div class="max-w-2xl mx-auto text-center mt-10">
     <h1 class="text-5xl font-extrabold mb-4 tracking-tight colombia-title">Rifa Colombia 2026</h1>
 
@@ -494,57 +564,11 @@
 
         <div class="faq-item border border-slate-700/40 rounded-2xl bg-slate-900/30 overflow-hidden">
           <button class="faq-btn w-full text-left px-5 py-4 flex items-center justify-between gap-3">
-            <span class="font-bold text-white">¿Puedo comprar más de un número?</span>
+            <span class="font-bold text-white">Puedo comprar mas de un numero?</span>
             <span class="faq-ico text-slate-300 font-black">+</span>
           </button>
           <div class="faq-body hidden px-5 pb-5 text-slate-300">
             Sí. Ahora puedes <b class="text-white">seleccionar varios números</b> y pagarlos <b class="text-white">en una sola compra</b>.
-          </div>
-        </div>
-
-        <div class="faq-item border border-slate-700/40 rounded-2xl bg-slate-900/30 overflow-hidden">
-          <button class="faq-btn w-full text-left px-5 py-4 flex items-center justify-between gap-3">
-            <span class="font-bold text-white">¿Cómo se elige al ganador?</span>
-            <span class="faq-ico text-slate-300 font-black">+</span>
-          </button>
-          <div class="faq-body hidden px-5 pb-5 text-slate-300 leading-relaxed text-sm md:text-base">
-            <p class="mb-3">El proceso se divide en estos puntos clave:</p>
-
-            <ul class="space-y-3">
-              <li class="flex gap-2">
-                <span class="text-emerald-400 font-bold">●</span>
-                <span><strong class="text-white">Transmisión en Vivo:</strong> El sorteo se realizará mediante un "Live" en nuestras redes sociales para que todos vean el proceso en tiempo real.</span>
-              </li>
-              <li class="flex gap-2">
-                <span class="text-emerald-400 font-bold">●</span>
-                <span><strong class="text-white">Fecha del Sorteo:</strong> Se definirá y anunciará oficialmente en cuanto alcancemos el <span class="text-emerald-400 font-bold">40% de los boletos vendidos</span>.</span>
-              </li>
-              <li class="flex gap-2">
-                <span class="text-emerald-400 font-bold">●</span>
-                <span><strong class="text-white">Notificación Directa:</strong> No tienes que estar revisando la web; te enviaremos un <span class="underline decoration-emerald-500/50">mensaje directo (WhatsApp/SMS)</span> en cuanto la fecha esté programada.</span>
-              </li>
-              <li class="flex gap-2">
-                <span class="text-emerald-400 font-bold">●</span>
-                <span><strong class="text-white">Contacto:</strong> Si resultas ganador, nos comunicaremos contigo personalmente para coordinar la entrega de tu premio.</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="faq-item border border-slate-700/40 rounded-2xl bg-slate-900/30 overflow-hidden mt-4">
-          <button class="faq-btn w-full text-left px-5 py-4 flex items-center justify-between gap-3">
-            <span class="font-bold text-white">¿Qué hacen con mis datos?</span>
-            <span class="faq-ico text-slate-300 font-black">+</span>
-          </button>
-          <div class="faq-body hidden px-5 pb-5 text-slate-300">
-            <p>
-              Tus datos se utilizan <span class="text-white font-medium">exclusivamente</span> para:
-            </p>
-            <ol class="list-decimal list-inside mt-2 space-y-1">
-              <li>Validar tu compra y asignar tus números.</li>
-              <li>Enviarte actualizaciones sobre la fecha del sorteo.</li>
-              <li>Contactarte de inmediato si ganas.</li>
-            </ol>
           </div>
         </div>
 
