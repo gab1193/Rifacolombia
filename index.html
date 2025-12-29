@@ -690,10 +690,14 @@
 
   // ✅ MULTI
   const PRICE = 100;
-  const MAX_SELECT = 10; // <-- puedes cambiar a 20 si quieres, pero 10 reduce errores
+  const MAX_SELECT = 10;
   document.getElementById("maxSelTxt").textContent = String(MAX_SELECT);
 
   let selectedNumbers = []; // array de números (enteros)
+
+  // ✅ FIX BUG: candado de checkout (para que no desaparezca el botón MP al reservar)
+  let checkoutLocked = false;
+  let lockedNumbers = [];
 
   // ✅ bloquear selección mientras carga status
   let isLoadingStatus = true;
@@ -732,6 +736,8 @@
   }
 
   function setPayMode(mode) {
+    if (checkoutLocked) return; // ✅ no permitir cambiar método cuando ya se creó el pago
+
     payMode = mode;
     resetCheckoutUI_();
 
@@ -759,12 +765,14 @@
 
   function formatNumberList_(arr){
     const a = [...arr].sort((x,y)=>x-y);
-    // Si son muchos, mostramos bonito
     return a.join(", ");
   }
 
+  // ✅ FIX BUG: si ya se generó preference, mostramos lockedNumbers aunque el status los marque RESERVADO
   function updateSelectionUI_(){
-    const count = selectedNumbers.length;
+    const displayNums = checkoutLocked ? lockedNumbers : selectedNumbers;
+
+    const count = displayNums.length;
     const total = count * PRICE;
 
     selCountEl.textContent = String(count);
@@ -773,9 +781,8 @@
     selectedCountDisplay.textContent = String(count);
     selectedTotalDisplay.textContent = String(total);
 
-    selectedNumberDisplay.textContent = count ? formatNumberList_(selectedNumbers) : "—";
+    selectedNumberDisplay.textContent = count ? formatNumberList_(displayNums) : "—";
 
-    // checkout visible si hay al menos 1
     const checkout = document.getElementById("checkout-container");
     if (count > 0) {
       checkout.classList.remove("hidden");
@@ -785,7 +792,11 @@
   }
 
   function clearSelection_(){
-    // quitar clase selected de todos
+    if (checkoutLocked) {
+      alert("⚠️ Ya generaste el pago. Si quieres cambiar selección, recarga la página.");
+      return;
+    }
+
     for (const n of selectedNumbers) {
       const btn = btnByNumber.get(Number(n));
       if (btn) btn.classList.remove("selected");
@@ -856,8 +867,10 @@
         btn.style.pointerEvents = "none";
         btn.onclick = null;
 
-        // si lo teníamos seleccionado, quitarlo
-        selectedNumbers = selectedNumbers.filter(x => Number(x) !== Number(n));
+        // ✅ FIX BUG: no borrar selección si ya está bloqueado el checkout
+        if (!checkoutLocked) {
+          selectedNumbers = selectedNumbers.filter(x => Number(x) !== Number(n));
+        }
       });
 
       // reservados
@@ -869,14 +882,18 @@
         btn.style.pointerEvents = "none";
         btn.onclick = null;
 
-        // si lo teníamos seleccionado, quitarlo
-        selectedNumbers = selectedNumbers.filter(x => Number(x) !== Number(n));
+        // ✅ FIX BUG: no borrar selección si ya está bloqueado el checkout
+        if (!checkoutLocked) {
+          selectedNumbers = selectedNumbers.filter(x => Number(x) !== Number(n));
+        }
       });
 
-      // re-pintar selección (si queda algo)
-      for (const n of selectedNumbers) {
-        const btn = btnByNumber.get(Number(n));
-        if (btn && btn.classList.contains("available")) btn.classList.add("selected");
+      // re-pintar selección (si queda algo) SOLO si no está bloqueado
+      if (!checkoutLocked) {
+        for (const n of selectedNumbers) {
+          const btn = btnByNumber.get(Number(n));
+          if (btn && btn.classList.contains("available")) btn.classList.add("selected");
+        }
       }
 
       updateSelectionUI_();
@@ -890,6 +907,7 @@
   }
 
   function toggleNumber(num, el) {
+    if (checkoutLocked) return; // ✅ FIX BUG: no permitir cambios si ya se creó el pago
     if (isLoadingStatus) return;
     if (el.classList.contains("sold") || el.classList.contains("reserved")) return;
 
@@ -973,6 +991,17 @@
       if (preference.ok && preference.id) {
         btnPre.style.display = "none";
 
+        // ✅ FIX BUG: bloquear checkout para que cargarStatus NO borre selección / NO oculte wallet
+        checkoutLocked = true;
+        lockedNumbers = numbersSorted;
+
+        // bloquear inputs y selector método mientras paga
+        document.getElementById("user-name").disabled = true;
+        document.getElementById("user-phone").disabled = true;
+        pillInstant.style.pointerEvents = "none";
+        pillOffline.style.pointerEvents = "none";
+        btnClearSel.disabled = true;
+
         // Guardamos preference_id para mostrar boleto al volver
         localStorage.setItem("last_preference_id", preference.id);
 
@@ -985,12 +1014,23 @@
           initialization: { preferenceId: preference.id, redirectMode: "modal" }
         });
 
+        // refrescar status sin romper el wallet
         await cargarStatus();
       } else {
         throw new Error(preference.error || "Sin preference id");
       }
     } catch (error) {
       alert("Error: " + error.message);
+
+      // ✅ si falla, desbloquear
+      checkoutLocked = false;
+      lockedNumbers = [];
+      document.getElementById("user-name").disabled = false;
+      document.getElementById("user-phone").disabled = false;
+      pillInstant.style.pointerEvents = "auto";
+      pillOffline.style.pointerEvents = "auto";
+      btnClearSel.disabled = false;
+
       btnPre.innerText = "Confirmar y Pagar";
       btnPre.disabled = false;
       await cargarStatus();
@@ -1133,7 +1173,6 @@
   }
 
   function paintTicketFromSheet(ticket) {
-    // ✅ nuevo: ticket puede traer numbers[] o numero
     const nums = Array.isArray(ticket.numbers) ? ticket.numbers.map(Number).filter(n=>!isNaN(n)) : [];
     const fallbackNums = getFallbackNumbers_();
 
@@ -1141,13 +1180,11 @@
     const qty = ticket.qty != null ? Number(ticket.qty) : finalNums.length;
     const total = ticket.total != null ? Number(ticket.total) : (qty * PRICE);
 
-    // header
     if (qty && qty > 1) {
       ovNumber.textContent = String(qty);
       ovNumbersRow.classList.remove("hidden");
       ovNumbers.textContent = finalNums.length ? formatNumberList_(finalNums) : "—";
     } else {
-      // 1 boleto
       ovNumber.textContent = finalNums.length ? String(finalNums[0]) : "--";
       ovNumbersRow.classList.add("hidden");
       ovNumbers.textContent = "—";
@@ -1304,7 +1341,7 @@
   });
 
   // ========= EVENTO 72H (COUNTDOWN) =========
-  const PROMO_END_ISO = "2025-12-29T18:00:00-07:00"; // <-- CAMBIA ESTA FECHA/HORA
+  const PROMO_END_ISO = "2025-12-29T18:00:00-07:00";
   const PROMO_TOTAL_MS = 72 * 60 * 60 * 1000;
   const PROMO_BLOCK_PURCHASES_WHEN_ENDS = false;
 
