@@ -7,7 +7,7 @@
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rifa Colombia 2026 🇨🇴</title>
+  <title>Colombia 2026 — Acceso Camerino VIP 🇨🇴</title>
   <script src="https://sdk.mercadopago.com/js/v2"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -223,7 +223,7 @@
       .chip { border:1px solid #ddd; background:#f9fafb; color:#111827; }
     }
 
-    /* ===== Evento 72h ===== */
+    /* ===== Ventana 72h (bono/beneficio) ===== */
     #promoBar{
       background: linear-gradient(to right, rgba(251,191,36,.95), rgba(59,130,246,.85), rgba(239,68,68,.85));
       box-shadow: 0 0 18px rgba(251,191,36,0.18);
@@ -331,21 +331,22 @@
       <span class="vip-title">Camerino</span>
       <span aria-hidden="true" style="font-size:14px; opacity:.9;">🎭</span>
     </a>
-    <div class="vip-sub">Contenido premium para compradores. Entra con tu boleto ✅</div>
+    <div class="vip-sub">Contenido premium para compradores. Entra con tu <b>folio</b> ✅</div>
   </div>
 
   <div class="max-w-2xl mx-auto text-center mt-10">
-    <h1 class="text-5xl font-extrabold mb-4 tracking-tight colombia-title">Rifa Colombia 2026</h1>
+    <h1 class="text-5xl font-extrabold mb-4 tracking-tight colombia-title">Colombia 2026</h1>
+    <div class="text-sm text-slate-300 font-bold tracking-wider uppercase mb-6">Acceso Camerino VIP • Apoyo a estudiantes</div>
 
-    <!-- ===== EVENTO 72H (SORTEO EXTRA) ===== -->
+    <!-- ===== Ventana 72H (BONO) ===== -->
     <div id="promo72h" class="glass-card p-5 md:p-6 rounded-[2rem] mb-8 border border-yellow-400/25 shadow-2xl text-left">
       <div class="flex items-start justify-between gap-4">
         <div>
-          <div class="text-xs font-black tracking-[.2em] uppercase text-yellow-300/90">Evento de 72 horas</div>
-          <div class="text-white font-black text-xl md:text-2xl mt-1">Sorteo extra: $500 MXN en tarjeta de regalo Amazon 🎁</div>
+          <div class="text-xs font-black tracking-[.2em] uppercase text-yellow-300/90">Ventana especial de 72 horas</div>
+          <div class="text-white font-black text-xl md:text-2xl mt-1">Bono extra: $500 MXN en tarjeta de regalo Amazon 🎁</div>
           <p class="text-slate-300 text-sm md:text-base mt-2 leading-relaxed">
-            Los boletos comprados dentro de estas <b class="text-white">72 horas</b> participan automáticamente.
-            Al terminar el contador se cierra el evento y se realiza el sorteo.
+            Los accesos confirmados dentro de estas <b class="text-white">72 horas</b> entran automáticamente.
+            Al terminar el contador se cierra la ventana y se publica el resultado.
           </p>
         </div>
 
@@ -365,8 +366,9 @@
     </div>
 
     <div class="mb-6">
-      <p class="text-lg text-slate-400 uppercase tracking-widest font-semibold">Gran Premio de</p>
+      <p class="text-lg text-slate-400 uppercase tracking-widest font-semibold">Premio en efectivo</p>
       <h2 class="chrome-text text-6xl md:text-7xl font-black my-2">$10,000 MXN</h2>
+      <div class="text-[12px] text-slate-400 font-bold mt-1">Se anunciará públicamente al finalizar la dinámica.</div>
     </div>
 
     <div class="flex justify-center items-center gap-4 mb-10 bg-slate-800/30 py-3 px-6 rounded-full w-fit mx-auto border border-slate-700/50">
@@ -380,8 +382,8 @@
     <div class="glass-card p-6 rounded-3xl mb-10 shadow-xl text-center">
       <p class="text-slate-300 leading-relaxed text-lg">
         ¡Hola! Somos una <span class="text-yellow-500 font-bold">generación de estudiantes de actuación</span> de Hermosillo.
-        Este 2026 viajaremos a representar el talento sonorense en <span class="text-blue-400 font-bold">Colombia</span>. 🎭 <br>
-        <span class="text-white">Con tu apoyo, nos ayudas a llevar nuestro arte más allá de las fronteras.</span>
+        En 2026 viajaremos a representar el talento sonorense en <span class="text-blue-400 font-bold">Colombia</span>. 🎭 <br>
+        <span class="text-white">Tu apoyo desbloquea el Camerino VIP</span> con contenido exclusivo (canciones inéditas, backstage y agradecimientos).
       </p>
     </div>
 
@@ -399,15 +401,15 @@
       <div class="mt-4 text-xs text-slate-400 flex flex-wrap justify-center gap-3">
         <span>✅ Disponibles: <b id="disponibles-texto" class="text-white">...</b></span>
         <span>🟨 Reservados: <b id="reservados-texto" class="text-yellow-400">...</b></span>
-        <span>⬛ Vendidos: <b id="vendidos-texto" class="text-slate-200">...</b></span>
+        <span>⬛ Confirmados: <b id="vendidos-texto" class="text-slate-200">...</b></span>
       </div>
     </div>
 
     <div class="glass-card p-8 rounded-[2rem] mb-8 shadow-2xl">
       <div class="flex items-start justify-between gap-4 mb-3">
         <div class="text-left">
-          <h2 class="text-2xl font-bold mb-1 text-white">1. Selecciona tus números de la suerte</h2>
-          <p class="text-green-400 font-medium">Solo $100 MXN por oportunidad</p>
+          <h2 class="text-2xl font-bold mb-1 text-white">1. Elige tu(s) folio(s)</h2>
+          <p class="text-green-400 font-medium">Aporte: $100 MXN por acceso</p>
         </div>
         <div class="text-right">
           <div class="text-[10px] uppercase tracking-[.2em] font-black text-slate-400">Seleccionados</div>
@@ -442,11 +444,11 @@
           <div>
             <div class="text-xs font-black tracking-[.2em] uppercase text-slate-400">Tu selección</div>
             <div class="text-white font-black text-lg mt-1">
-              <span id="selected-count-display">0</span> boleto(s) • Total: <span class="text-blue-400">$</span><span id="selected-total-display" class="text-blue-400">0</span>
+              <span id="selected-count-display">0</span> acceso(s) • Total: <span class="text-blue-400">$</span><span id="selected-total-display" class="text-blue-400">0</span>
             </div>
           </div>
           <div class="text-right">
-            <div class="text-[10px] uppercase tracking-[.2em] font-black text-slate-400">Números</div>
+            <div class="text-[10px] uppercase tracking-[.2em] font-black text-slate-400">Folios</div>
             <div id="selected-number-display" class="text-blue-400 text-lg font-black leading-tight">—</div>
           </div>
         </div>
@@ -457,7 +459,7 @@
 
       <div class="space-y-4 mb-8 text-left">
         <div>
-          <label class="block text-xs text-slate-400 mb-2 ml-1 font-bold uppercase tracking-widest">Nombre del Participante</label>
+          <label class="block text-xs text-slate-400 mb-2 ml-1 font-bold uppercase tracking-widest">Nombre</label>
           <input type="text" id="user-name" placeholder="Tu nombre completo" class="w-full bg-slate-900/80 border border-slate-700 rounded-2xl p-4 text-white focus:border-blue-500 outline-none transition-all">
         </div>
         <div>
@@ -500,7 +502,7 @@
       <div id="wallet_container" class="mt-4"></div>
 
       <p class="text-[11px] text-slate-500 mt-6 px-4 italic leading-relaxed text-center">
-        🛡️ Tus datos están seguros. Se usarán exclusivamente para contactarte en caso de que tu número resulte premiado.
+        🛡️ Tus datos están seguros. Se usarán para identificar tu acceso y, si aplica, contactarte por el premio.
       </p>
     </div>
 
@@ -514,11 +516,11 @@
       <div id="faqList" class="space-y-3">
         <div class="faq-item border border-slate-700/40 rounded-2xl bg-slate-900/30 overflow-hidden">
           <button class="faq-btn w-full text-left px-5 py-4 flex items-center justify-between gap-3">
-            <span class="font-bold text-white">¿Cuánto cuesta el boleto?</span>
+            <span class="font-bold text-white">¿Cuánto cuesta el acceso?</span>
             <span class="faq-ico text-slate-300 font-black">+</span>
           </button>
           <div class="faq-body hidden px-5 pb-5 text-slate-300">
-            El boleto cuesta <b class="text-white">$100 MXN</b>.
+            El acceso cuesta <b class="text-white">$100 MXN</b>.
           </div>
         </div>
 
@@ -548,27 +550,27 @@
             <span class="faq-ico text-slate-300 font-black">+</span>
           </button>
           <div class="faq-body hidden px-5 pb-5 text-slate-300">
-            Si el pago no se completa dentro del tiempo de reserva, los números vuelven a estar disponibles para otra persona.
+            Si el pago no se completa dentro del tiempo de reserva, los folios vuelven a estar disponibles.
           </div>
         </div>
 
         <div class="faq-item border border-slate-700/40 rounded-2xl bg-slate-900/30 overflow-hidden">
           <button class="faq-btn w-full text-left px-5 py-4 flex items-center justify-between gap-3">
-            <span class="font-bold text-white">¿Cómo recibo mi boleto?</span>
+            <span class="font-bold text-white">¿Cómo recibo mi comprobante?</span>
             <span class="faq-ico text-slate-300 font-black">+</span>
           </button>
           <div class="faq-body hidden px-5 pb-5 text-slate-300">
-            Al finalizar el pago se muestra tu <b class="text-white">boleto digital</b> con tus números, nombre, WhatsApp y folio de pago. Puedes <b class="text-white">guardarlo/imprimirlo</b>.
+            Al finalizar el pago se muestra tu <b class="text-white">comprobante digital</b> con tus folios, nombre, WhatsApp y folio de pago. Puedes <b class="text-white">guardarlo/imprimirlo</b>.
           </div>
         </div>
 
         <div class="faq-item border border-slate-700/40 rounded-2xl bg-slate-900/30 overflow-hidden">
           <button class="faq-btn w-full text-left px-5 py-4 flex items-center justify-between gap-3">
-            <span class="font-bold text-white">Puedo comprar mas de un numero?</span>
+            <span class="font-bold text-white">¿Puedo elegir más de un folio?</span>
             <span class="faq-ico text-slate-300 font-black">+</span>
           </button>
           <div class="faq-body hidden px-5 pb-5 text-slate-300">
-            Sí. Ahora puedes <b class="text-white">seleccionar varios números</b> y pagarlos <b class="text-white">en una sola compra</b>.
+            Sí. Puedes <b class="text-white">seleccionar varios folios</b> y pagarlos <b class="text-white">en una sola compra</b>.
           </div>
         </div>
 
@@ -577,9 +579,9 @@
           <ul class="text-slate-300 text-sm leading-relaxed space-y-2">
             <li>• La compra se confirma cuando el pago aparece como <b class="text-white">APROBADO</b> en Mercado Pago.</li>
             <li>• Para <b class="text-white">transferencia/OXXO</b>, la confirmación puede tardar; tu selección queda reservada hasta 24h.</li>
-            <li>• Si el pago no se confirma dentro del periodo de reserva, los números vuelven a estar disponibles.</li>
-            <li>• Guarda tu <b class="text-white">boleto digital</b> (captura/impresión) como comprobante.</li>
-            <li>• La fecha del sorteo se publicará cuando se alcance el 40% de los boletos vendidos.</li>
+            <li>• Si el pago no se confirma dentro del periodo de reserva, los folios vuelven a estar disponibles.</li>
+            <li>• Guarda tu <b class="text-white">comprobante</b> (captura/impresión) como referencia.</li>
+            <li>• La fecha del anuncio del premio se publicará cuando se alcance el 40% de confirmaciones.</li>
           </ul>
         </div>
       </div>
@@ -594,7 +596,7 @@
     </div>
   </div>
 
-  <!-- ===== Overlay Confirmación + Boleto ===== -->
+  <!-- ===== Overlay Confirmación + Comprobante ===== -->
   <div id="confirmOverlay" class="overlay" aria-hidden="true">
     <div class="ticket-card">
       <div class="ticket-head">
@@ -608,21 +610,21 @@
         <div class="mt-4 flex items-center justify-between gap-3">
           <span id="ovBadge" class="badge"><span class="spinner"></span> PROCESANDO</span>
           <div class="text-right">
-            <div class="text-slate-200/70 text-xs uppercase tracking-[.2em] font-black">Boletos</div>
+            <div class="text-slate-200/70 text-xs uppercase tracking-[.2em] font-black">Folios / Accesos</div>
             <div id="ovNumber" class="big-number">--</div>
           </div>
         </div>
 
-        <!-- ✅ lista corta de números en header -->
+        <!-- ✅ lista corta de folios en header -->
         <div id="ovNumbersRow" class="mt-3 text-left hidden">
-          <div class="text-[10px] uppercase tracking-[.2em] font-black text-slate-200/70">Números</div>
+          <div class="text-[10px] uppercase tracking-[.2em] font-black text-slate-200/70">Folios</div>
           <div id="ovNumbers" class="text-white font-black text-sm mt-1 leading-relaxed">—</div>
         </div>
       </div>
 
       <div class="ticket-body">
         <div id="ticketKVs" class="space-y-0">
-          <div class="kv"><div class="k">Participante</div><div id="tName" class="v">—</div></div>
+          <div class="kv"><div class="k">Nombre</div><div id="tName" class="v">—</div></div>
           <div class="kv"><div class="k">WhatsApp</div><div id="tPhone" class="v">—</div></div>
           <div class="kv"><div class="k">Estado</div><div id="tStatus" class="v">—</div></div>
           <div class="kv"><div class="k">Pago ID</div><div id="tPayId" class="v">—</div></div>
@@ -634,7 +636,7 @@
         <div id="ticketShare" class="mt-6 p-4 rounded-2xl border border-slate-700/40 bg-slate-900/30">
           <div class="flex items-center justify-between gap-3">
             <div>
-              <div class="text-xs font-black tracking-[.2em] uppercase text-slate-400">Tu boleto permanente</div>
+              <div class="text-xs font-black tracking-[.2em] uppercase text-slate-400">Tu comprobante permanente</div>
               <div class="text-slate-200 text-sm">Guárdalo o compártelo (incluye QR).</div>
             </div>
             <div class="text-xs font-black text-blue-400" id="shareStatus">—</div>
@@ -649,7 +651,7 @@
                 <button id="btnCopyLink" class="btnx btn-ghost" style="width:auto; padding:10px 12px;">Copiar</button>
               </div>
               <p class="text-[11px] text-slate-400 mt-2 leading-relaxed">
-                Tip: si cierras la página, con este link puedes volver a ver tu boleto.
+                Tip: si cierras la página, con este link puedes volver a ver tu comprobante.
               </p>
             </div>
 
@@ -659,14 +661,14 @@
                 <div id="ticketQR"></div>
               </div>
               <p class="text-[11px] text-slate-400 mt-2 leading-relaxed">
-                Escanéalo para abrir tu boleto.
+                Escanéalo para abrir tu comprobante.
               </p>
             </div>
           </div>
         </div>
 
         <div id="ticketActions" class="mt-6 space-y-3">
-          <button id="btnPrint" class="btnx btn-primary">Guardar / Imprimir boleto</button>
+          <button id="btnPrint" class="btnx btn-primary">Guardar / Imprimir</button>
           <button id="btnRefreshStatus" class="btnx btn-ghost">Actualizar estado</button>
         </div>
 
@@ -693,7 +695,7 @@
   const MAX_SELECT = 10;
   document.getElementById("maxSelTxt").textContent = String(MAX_SELECT);
 
-  let selectedNumbers = []; // array de números (enteros)
+  let selectedNumbers = []; // array de folios (enteros)
 
   // ✅ FIX BUG: candado de checkout (para que no desaparezca el botón MP al reservar)
   let checkoutLocked = false;
@@ -708,11 +710,11 @@
   const luckyMessages = [
     "¡Excelente elección!",
     "¡Buena vibra!",
-    "¡El ganador!",
     "¡A por todas!",
-    "¡Tu número de la suerte!",
-    "¡Siento la suerte!",
-    "¡Hermosillo presente!"
+    "¡Se siente la suerte!",
+    "¡Hermosillo presente!",
+    "¡Vamos con todo!",
+    "¡Qué buena selección!"
   ];
 
   const btnByNumber = new Map();
@@ -831,7 +833,7 @@
 
   async function cargarStatus() {
     const msg = document.getElementById("status-msg");
-    msg.textContent = "Cargando números disponibles...";
+    msg.textContent = "Cargando folios disponibles...";
 
     isLoadingStatus = true;
     setGridEnabled(false);
@@ -897,7 +899,7 @@
       }
 
       updateSelectionUI_();
-      msg.textContent = "Listo ✅ Elige tus números disponibles.";
+      msg.textContent = "Listo ✅ Elige tus folios disponibles.";
     } catch (e) {
       msg.textContent = "No pude cargar el estado. Revisa /api/gs.";
     } finally {
@@ -924,7 +926,7 @@
 
     // agregar (con límite)
     if (selectedNumbers.length >= MAX_SELECT) {
-      alert(`⚠️ Máximo ${MAX_SELECT} números por compra. Puedes pagar y luego comprar más.`);
+      alert(`⚠️ Máximo ${MAX_SELECT} folios por compra. Puedes pagar y luego elegir más.`);
       return;
     }
 
@@ -951,7 +953,7 @@
     }
 
     if (!selectedNumbers.length) {
-      alert("Selecciona al menos un número.");
+      alert("Selecciona al menos un folio.");
       return;
     }
 
@@ -960,6 +962,7 @@
       return;
     }
 
+    // ✅ COMPATIBLE con code.gs: "card" o "offline"
     const pay_method = (payMode === "offline") ? "offline" : "card";
 
     btnPre.innerText = "Conectando...";
@@ -1002,7 +1005,7 @@
         pillOffline.style.pointerEvents = "none";
         btnClearSel.disabled = true;
 
-        // Guardamos preference_id para mostrar boleto al volver
+        // Guardamos preference_id para mostrar comprobante al volver
         localStorage.setItem("last_preference_id", preference.id);
 
         // Para fallback visual si algo no carga (guardamos lista)
@@ -1039,7 +1042,7 @@
 
   document.getElementById("btn-pre-pago").addEventListener("click", renderPaymentButton);
 
-  // ========= OVERLAY / BOLETO =========
+  // ========= OVERLAY / COMPROBANTE =========
   const overlay = document.getElementById("confirmOverlay");
   const overlayClose = document.getElementById("overlayClose");
   const ovSubtitle = document.getElementById("ovSubtitle");
@@ -1194,8 +1197,8 @@
     tPhone.textContent = ticket.whatsapp || "—";
 
     const st = String(ticket.estado || ticket.status || "—").toUpperCase();
-    if (st === "VENDIDO") tStatus.textContent = "✅ VENDIDO (confirmado)";
-    else if (st === "RESERVADO") tStatus.textContent = "🕒 RESERVADO (en proceso)";
+    if (st === "VENDIDO") tStatus.textContent = "✅ CONFIRMADO";
+    else if (st === "RESERVADO") tStatus.textContent = "🕒 EN PROCESO";
     else tStatus.textContent = ticket.estado || "—";
 
     tPayId.textContent = ticket.id_pago || "—";
@@ -1227,7 +1230,7 @@
   async function refreshOverlayStatus() {
     showOverlay();
     setBadge("loading", "VERIFICANDO");
-    ovSubtitle.textContent = "Cargando tu boleto…";
+    ovSubtitle.textContent = "Cargando tu comprobante…";
 
     const qs = new URLSearchParams(window.location.search);
 
@@ -1262,13 +1265,13 @@
         if (v.ok) {
           if (v.status === "approved") {
             setBadge("ok", "PAGO APROBADO");
-            ovSubtitle.textContent = "¡Listo! Tu boleto ya está confirmado.";
-            tStatus.textContent = "✅ VENDIDO (aprobado)";
+            ovSubtitle.textContent = "¡Listo! Tu compra ya está confirmada.";
+            tStatus.textContent = "✅ CONFIRMADO";
             tPayId.textContent = v.id || payment_id;
           } else if (v.status === "pending" || v.status === "in_process") {
             setBadge("pending", "PAGO PENDIENTE");
             ovSubtitle.textContent = "Tu pago está en proceso. Puedes volver después a actualizar.";
-            tStatus.textContent = "🕒 RESERVADO / PENDIENTE";
+            tStatus.textContent = "🕒 EN PROCESO";
             tPayId.textContent = v.id || payment_id;
           } else {
             setBadge("fail", "PAGO NO APROBADO");
@@ -1285,7 +1288,7 @@
         } else {
           if (pago === "success" || status === "approved") {
             setBadge("ok", "PAGO APROBADO");
-            ovSubtitle.textContent = "Pago aprobado. Si tu boleto tarda en reflejarse, actualiza en unos segundos.";
+            ovSubtitle.textContent = "Pago aprobado. Si tarda en reflejarse, actualiza en unos segundos.";
           } else if (pago === "pending" || status === "pending") {
             setBadge("pending", "PAGO PENDIENTE");
             ovSubtitle.textContent = "Tu pago está en proceso.";
@@ -1306,19 +1309,19 @@
 
     if (ticket_pref) {
       const shownStatus = (tStatus.textContent || "").toUpperCase();
-      if (shownStatus.includes("VENDIDO")) {
+      if (shownStatus.includes("CONFIRMADO")) {
         setBadge("ok", "CONFIRMADO");
-        ovSubtitle.textContent = "✅ Pago confirmado. Este es tu boleto ya validado.";
+        ovSubtitle.textContent = "✅ Pago confirmado. Este es tu comprobante validado.";
       } else {
         setBadge("pending", "EN PROCESO");
-        ovSubtitle.textContent = "🕒 Si pagaste por transferencia/OXXO, puede tardar en confirmarse. Usa “Actualizar estado”.";
+        ovSubtitle.textContent = "🕒 Si pagaste por transferencia/OXXO, puede tardar. Usa “Actualizar estado”.";
       }
       return;
     }
 
     if (pago === "success" || status === "approved") {
       setBadge("ok", "PAGO APROBADO");
-      ovSubtitle.textContent = "¡Listo! Si no ves el boleto aún, actualiza en unos segundos.";
+      ovSubtitle.textContent = "¡Listo! Si no ves el comprobante aún, actualiza en unos segundos.";
       return;
     }
     if (pago === "pending" || status === "pending") {
@@ -1340,7 +1343,7 @@
     await cargarStatus();
   });
 
-  // ========= EVENTO 72H (COUNTDOWN) =========
+  // ========= Ventana 72H (COUNTDOWN) =========
   const PROMO_END_ISO = "2025-12-29T18:00:00-07:00";
   const PROMO_TOTAL_MS = 72 * 60 * 60 * 1000;
   const PROMO_BLOCK_PURCHASES_WHEN_ENDS = false;
@@ -1372,7 +1375,7 @@
     if (btnPre) {
       btnPre.disabled = !enabled;
       if (!enabled) {
-        btnPre.innerText = "Evento finalizado";
+        btnPre.innerText = "Ventana finalizada";
         btnPre.style.opacity = "0.65";
         btnPre.style.cursor = "not-allowed";
       }
