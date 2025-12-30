@@ -456,8 +456,8 @@
   </p>
 
   <p class="text-slate-300 leading-relaxed text-lg mb-8">
-    Estoy recaudando fondos para cubrir mis vuelos y viáticos. Si decides apoyarme,
-    tienes acceso a mi <span class="text-yellow-500 font-bold">"Camerino VIP :)"</span>.
+    Estoy recaudando fondos para cubrir mis vuelos y viáticos. Por eso, si decides apoyarme,
+    te doy acceso a mi <span class="text-yellow-500 font-bold">"Camerino VIP"</span>.
   </p>
 
   <div class="bg-white/5 p-5 rounded-2xl mb-8 border border-yellow-500/20">
@@ -1449,7 +1449,6 @@
     if (willOpen) {
       promoVideoWrap.classList.add("open");
       if (btnToggleResult) btnToggleResult.textContent = "Ocultar";
-      // scroll suave al video para que no "tape" toda la pantalla, solo te lleve al bloque
       setTimeout(() => promoVideoWrap.scrollIntoView({ behavior: "smooth", block: "start" }), 120);
     } else {
       closePromoVideo_();
@@ -1465,6 +1464,9 @@
     const end = new Date(PROMO_END_ISO).getTime();
     const start = end - PROMO_TOTAL_MS;
 
+    // ✅ FIX: cerrar el video SOLO una vez cuando se detecta el cambio a FINALIZADO
+    let promoFinalizedOnce = false;
+
     function tick(){
       const now = Date.now();
       const left = end - now;
@@ -1476,13 +1478,20 @@
         promoState.classList.add("text-red-400");
         promoBar.style.width = "0%";
 
-        // ✅ mostrar bloque de resultado, pero mantener video cerrado por defecto
         if (promoResult) promoResult.classList.remove("hidden");
-        closePromoVideo_();
+
+        // ✅ solo la primera vez que entra a finalizado, lo dejamos cerrado por defecto
+        if (!promoFinalizedOnce) {
+          closePromoVideo_();
+          promoFinalizedOnce = true;
+        }
 
         if (PROMO_BLOCK_PURCHASES_WHEN_ENDS) setPurchasesEnabled_(false);
         return;
       }
+
+      // si vuelve a estar activo (por reloj mal/ajustes), resetea bandera
+      promoFinalizedOnce = false;
 
       promoState.textContent = "ACTIVO";
       promoState.classList.remove("text-red-400");
@@ -1492,7 +1501,6 @@
       const progress = Math.min(1, Math.max(0, (end - now) / (end - start)));
       promoBar.style.width = `${Math.round(progress * 100)}%`;
 
-      // ocultar resultado mientras está activo
       if (promoResult) promoResult.classList.add("hidden");
       closePromoVideo_();
 
