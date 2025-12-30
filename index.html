@@ -209,7 +209,6 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* impresión del ticket */
     @media print {
       body { background: white !important; overflow: visible !important; height:auto !important; }
       .overlay { position: static; display: block !important; background: transparent; backdrop-filter:none; overflow: visible !important; }
@@ -223,14 +222,14 @@
       .chip { border:1px solid #ddd; background:#f9fafb; color:#111827; }
     }
 
-    /* ===== Ventana 72h (bono/beneficio) ===== */
+    /* ===== Ventana 72h ===== */
     #promoBar{
       background: linear-gradient(to right, rgba(251,191,36,.95), rgba(59,130,246,.85), rgba(239,68,68,.85));
       box-shadow: 0 0 18px rgba(251,191,36,0.18);
       transition: width .9s cubic-bezier(.4,0,.2,1);
     }
 
-    /* ===== Mini guía (reduce frustración) ===== */
+    /* ===== Mini guía ===== */
     .helper-bar{
       position: sticky;
       top: 10px;
@@ -261,12 +260,12 @@
       font-weight: 700;
     }
 
-    /* ===== BOTÓN CAMERINO (VIP) ===== */
+    /* ===== BOTÓN CAMERINO ===== */
     .vip-fab{
       position: fixed;
       top: 14px;
       right: 14px;
-      z-index: 9998; /* debajo del overlay (9999) */
+      z-index: 9998;
       display: flex;
       flex-direction: column;
       align-items: flex-end;
@@ -319,6 +318,20 @@
       max-width: 210px;
       text-align: right;
     }
+
+    /* ===== RESULTADO (COLLAPSIBLE VIDEO) ===== */
+    .collapse-wrap{
+      overflow: hidden;
+      max-height: 0px;
+      opacity: 0;
+      transform: translateY(-6px);
+      transition: max-height .35s cubic-bezier(.4,0,.2,1), opacity .25s ease, transform .25s ease;
+    }
+    .collapse-wrap.open{
+      max-height: 1200px; /* suficientemente grande */
+      opacity: 1;
+      transform: translateY(0);
+    }
   </style>
 </head>
 
@@ -364,7 +377,7 @@
         <div id="promoEndsAt" class="text-[11px] text-slate-400 mt-2"></div>
       </div>
 
-      <!-- ✅ RESULTADO (solo aparece cuando FINALIZA) -->
+      <!-- ✅ RESULTADO (aparece al finalizar, PERO el video NO se despliega solo) -->
       <div id="promoResult" class="hidden mt-5 p-4 rounded-2xl border border-slate-700/40 bg-slate-900/30">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
@@ -372,23 +385,45 @@
             <div class="text-white font-black text-lg mt-1">Ganador: <span class="text-yellow-300">Folio 29</span> — Gerardo Meran ✅</div>
             <div class="text-slate-300 text-sm mt-1">Evidencia en una sola toma (video).</div>
           </div>
-          <a href="https://youtube.com/shorts/ETKNTg2rAP8" target="_blank" rel="noopener"
-             class="btnx btn-ghost" style="width:auto; padding:10px 12px;">
-            Ver en YouTube
-          </a>
+
+          <div class="flex flex-col sm:flex-row gap-2">
+            <button id="btnToggleResult" class="btnx btn-primary" style="width:auto; padding:10px 12px;">
+              Ver resultado
+            </button>
+            <a href="https://youtube.com/shorts/ETKNTg2rAP8" target="_blank" rel="noopener"
+              class="btnx btn-ghost" style="width:auto; padding:10px 12px;">
+              Ver en YouTube
+            </a>
+          </div>
         </div>
 
-        <div class="mt-4 rounded-2xl overflow-hidden border border-slate-700/40 bg-slate-950/30">
-          <div style="position:relative; width:100%; padding-top:177.77%;">
-            <iframe
-              src="https://www.youtube.com/embed/ETKNTg2rAP8"
-              title="Resultado bono Amazon"
-              frameborder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowfullscreen
-              style="position:absolute; inset:0; width:100%; height:100%;"
-            ></iframe>
+        <!-- COLLAPSE VIDEO -->
+        <div id="promoVideoWrap" class="collapse-wrap mt-4">
+          <div class="flex justify-end mb-2">
+            <button id="btnHideResult" class="btnx btn-ghost" style="width:auto; padding:10px 12px;">
+              Ocultar
+            </button>
           </div>
+
+          <div class="rounded-2xl overflow-hidden border border-slate-700/40 bg-slate-950/30">
+            <!-- Nota: esta caja es grande porque es un SHORT vertical (9:16) -->
+            <div style="position:relative; width:100%; max-width:420px; margin:0 auto; padding-top:177.77%;">
+              <iframe
+                id="promoIframe"
+                src="https://www.youtube.com/embed/ETKNTg2rAP8"
+                title="Resultado bono Amazon"
+                frameborder="0"
+                loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen
+                style="position:absolute; inset:0; width:100%; height:100%;"
+              ></iframe>
+            </div>
+          </div>
+
+          <p class="text-[11px] text-slate-400 mt-3 leading-relaxed">
+            Tip: Puedes ocultarlo para seguir navegando la página.
+          </p>
         </div>
       </div>
     </div>
@@ -421,8 +456,8 @@
   </p>
 
   <p class="text-slate-300 leading-relaxed text-lg mb-8">
-    Estoy recaudando fondos para cubrir mis vuelos y viáticos. Por eso, si decides apoyarme,
-    te doy acceso a mi <span class="text-yellow-500 font-bold">"Camerino VIP"</span>.
+    Estoy recaudando fondos para cubrir mis vuelos y viáticos. Si decides apoyarme,
+    tienes acceso a mi <span class="text-yellow-500 font-bold">"Camerino VIP :)"</span>.
   </p>
 
   <div class="bg-white/5 p-5 rounded-2xl mb-8 border border-yellow-500/20">
@@ -470,7 +505,6 @@
         </div>
       </div>
 
-      <!-- ✅ Mini guía anti-frustración -->
       <div class="helper-bar text-left">
         <div class="helper-left">
           <span class="helper-step">1) Elige</span>
@@ -490,7 +524,6 @@
         ✨ <span id="random-lucky-msg">...</span>
       </h3>
 
-      <!-- ✅ Resumen de selección (multi) -->
       <div class="glass-card p-4 rounded-2xl mb-6 border border-slate-700/40 bg-slate-900/30 text-left">
         <div class="flex items-center justify-between gap-3">
           <div>
@@ -520,7 +553,6 @@
         </div>
       </div>
 
-      <!-- selector método -->
       <div class="text-left mb-6">
         <p class="text-xs text-slate-400 font-bold uppercase tracking-widest mb-2 ml-1">Método de pago</p>
 
@@ -558,7 +590,6 @@
       </p>
     </div>
 
-    <!-- ===== FAQ + REGLAS ===== -->
     <div class="glass-card p-8 rounded-[2rem] mb-10 shadow-2xl text-left">
       <div class="flex items-center justify-between gap-3 mb-4">
         <h2 class="text-2xl font-black text-white">Preguntas frecuentes</h2>
@@ -667,7 +698,6 @@
           </div>
         </div>
 
-        <!-- ✅ lista corta de folios en header -->
         <div id="ovNumbersRow" class="mt-3 text-left hidden">
           <div class="text-[10px] uppercase tracking-[.2em] font-black text-slate-200/70">Folios</div>
           <div id="ovNumbers" class="text-white font-black text-sm mt-1 leading-relaxed">—</div>
@@ -684,7 +714,6 @@
           <div class="kv"><div class="k">Total</div><div id="tTotal" class="v">—</div></div>
         </div>
 
-        <!-- LINK PERMANENTE + QR -->
         <div id="ticketShare" class="mt-6 p-4 rounded-2xl border border-slate-700/40 bg-slate-900/30">
           <div class="flex items-center justify-between gap-3">
             <div>
@@ -735,29 +764,22 @@
   // ========= CONFIG =========
   const API_URL = "/api/gs";
 
-  // ✅ Public Key (frontend)
   const MP_PUBLIC_KEY = "APP_USR-5cf8db98-d91a-44c4-bb21-b2206fd823a4";
   const mp = new MercadoPago(MP_PUBLIC_KEY, { locale: "es-MX" });
 
   // ========= STATE =========
   const grid = document.getElementById("grid");
 
-  // ✅ MULTI
   const PRICE = 100;
   const MAX_SELECT = 10;
   document.getElementById("maxSelTxt").textContent = String(MAX_SELECT);
 
-  let selectedNumbers = []; // array de folios (enteros)
-
-  // ✅ FIX BUG: candado de checkout (para que no desaparezca el botón MP al reservar)
+  let selectedNumbers = [];
   let checkoutLocked = false;
   let lockedNumbers = [];
 
-  // ✅ bloquear selección mientras carga status
   let isLoadingStatus = true;
-
-  // modo UI
-  let payMode = "instant"; // instant/offline
+  let payMode = "instant";
 
   const luckyMessages = [
     "¡Excelente elección!",
@@ -790,7 +812,7 @@
   }
 
   function setPayMode(mode) {
-    if (checkoutLocked) return; // ✅ no permitir cambiar método cuando ya se creó el pago
+    if (checkoutLocked) return;
 
     payMode = mode;
     resetCheckoutUI_();
@@ -822,7 +844,6 @@
     return a.join(", ");
   }
 
-  // ✅ FIX BUG: si ya se generó preference, mostramos lockedNumbers aunque el status los marque RESERVADO
   function updateSelectionUI_(){
     const displayNums = checkoutLocked ? lockedNumbers : selectedNumbers;
 
@@ -838,11 +859,8 @@
     selectedNumberDisplay.textContent = count ? formatNumberList_(displayNums) : "—";
 
     const checkout = document.getElementById("checkout-container");
-    if (count > 0) {
-      checkout.classList.remove("hidden");
-    } else {
-      checkout.classList.add("hidden");
-    }
+    if (count > 0) checkout.classList.remove("hidden");
+    else checkout.classList.add("hidden");
   }
 
   function clearSelection_(){
@@ -904,7 +922,6 @@
       document.getElementById("reservados-texto").innerText = data.reservados_count ?? "...";
       document.getElementById("vendidos-texto").innerText = data.vendidos_count ?? "...";
 
-      // reset grid
       for (const [num, btn] of btnByNumber.entries()) {
         btn.classList.remove("sold", "reserved");
         btn.classList.add("available");
@@ -912,7 +929,6 @@
         btn.onclick = () => toggleNumber(num, btn);
       }
 
-      // vendidos
       (data.vendidos || []).forEach(n => {
         const btn = btnByNumber.get(Number(n));
         if (!btn) return;
@@ -921,13 +937,9 @@
         btn.style.pointerEvents = "none";
         btn.onclick = null;
 
-        // ✅ FIX BUG: no borrar selección si ya está bloqueado el checkout
-        if (!checkoutLocked) {
-          selectedNumbers = selectedNumbers.filter(x => Number(x) !== Number(n));
-        }
+        if (!checkoutLocked) selectedNumbers = selectedNumbers.filter(x => Number(x) !== Number(n));
       });
 
-      // reservados
       (data.reservados || []).forEach(n => {
         const btn = btnByNumber.get(Number(n));
         if (!btn) return;
@@ -936,13 +948,9 @@
         btn.style.pointerEvents = "none";
         btn.onclick = null;
 
-        // ✅ FIX BUG: no borrar selección si ya está bloqueado el checkout
-        if (!checkoutLocked) {
-          selectedNumbers = selectedNumbers.filter(x => Number(x) !== Number(n));
-        }
+        if (!checkoutLocked) selectedNumbers = selectedNumbers.filter(x => Number(x) !== Number(n));
       });
 
-      // re-pintar selección (si queda algo) SOLO si no está bloqueado
       if (!checkoutLocked) {
         for (const n of selectedNumbers) {
           const btn = btnByNumber.get(Number(n));
@@ -961,13 +969,12 @@
   }
 
   function toggleNumber(num, el) {
-    if (checkoutLocked) return; // ✅ FIX BUG: no permitir cambios si ya se creó el pago
+    if (checkoutLocked) return;
     if (isLoadingStatus) return;
     if (el.classList.contains("sold") || el.classList.contains("reserved")) return;
 
     const exists = selectedNumbers.includes(num);
 
-    // quitar
     if (exists) {
       selectedNumbers = selectedNumbers.filter(n => n !== num);
       el.classList.remove("selected");
@@ -976,7 +983,6 @@
       return;
     }
 
-    // agregar (con límite)
     if (selectedNumbers.length >= MAX_SELECT) {
       alert(`⚠️ Máximo ${MAX_SELECT} folios por compra. Puedes pagar y luego elegir más.`);
       return;
@@ -993,7 +999,7 @@
     document.getElementById("checkout-container").scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
-  // ========= CREAR PAGO (single o multi) =========
+  // ========= CREAR PAGO =========
   async function renderPaymentButton() {
     const name = document.getElementById("user-name").value.trim();
     const phone = document.getElementById("user-phone").value.trim();
@@ -1014,13 +1020,11 @@
       return;
     }
 
-    // ✅ COMPATIBLE con code.gs: "card" o "offline"
     const pay_method = (payMode === "offline") ? "offline" : "card";
 
     btnPre.innerText = "Conectando...";
     btnPre.disabled = true;
 
-    // Ordenar selección (bonito y consistente)
     const numbersSorted = [...selectedNumbers].sort((a,b)=>a-b);
 
     try {
@@ -1031,7 +1035,6 @@
         pay_method: pay_method
       };
 
-      // ✅ backward-compatible:
       if (numbersSorted.length === 1) payload.number = numbersSorted[0];
       else payload.numbers = numbersSorted;
 
@@ -1046,21 +1049,16 @@
       if (preference.ok && preference.id) {
         btnPre.style.display = "none";
 
-        // ✅ FIX BUG: bloquear checkout para que cargarStatus NO borre selección / NO oculte wallet
         checkoutLocked = true;
         lockedNumbers = numbersSorted;
 
-        // bloquear inputs y selector método mientras paga
         document.getElementById("user-name").disabled = true;
         document.getElementById("user-phone").disabled = true;
         pillInstant.style.pointerEvents = "none";
         pillOffline.style.pointerEvents = "none";
         btnClearSel.disabled = true;
 
-        // Guardamos preference_id para mostrar comprobante al volver
         localStorage.setItem("last_preference_id", preference.id);
-
-        // Para fallback visual si algo no carga (guardamos lista)
         localStorage.setItem("last_numbers", JSON.stringify(numbersSorted));
         localStorage.setItem("last_total", String(numbersSorted.length * PRICE));
 
@@ -1069,7 +1067,6 @@
           initialization: { preferenceId: preference.id, redirectMode: "modal" }
         });
 
-        // refrescar status sin romper el wallet
         await cargarStatus();
       } else {
         throw new Error(preference.error || "Sin preference id");
@@ -1077,7 +1074,6 @@
     } catch (error) {
       alert("Error: " + error.message);
 
-      // ✅ si falla, desbloquear
       checkoutLocked = false;
       lockedNumbers = [];
       document.getElementById("user-name").disabled = false;
@@ -1113,7 +1109,6 @@
   const btnPrint = document.getElementById("btnPrint");
   const btnRefreshStatus = document.getElementById("btnRefreshStatus");
 
-  // ===== SHARE (LINK + QR) =====
   const ticketLinkInput = document.getElementById("ticketLinkInput");
   const btnCopyLink = document.getElementById("btnCopyLink");
   const ticketQR = document.getElementById("ticketQR");
@@ -1209,9 +1204,7 @@
   async function releaseReservationByPreference(preferenceId) {
     if (!preferenceId) return;
     try {
-      await fetch(API_URL + `?action=release_reservation&preference_id=${encodeURIComponent(preferenceId)}`, {
-        method: "GET"
-      });
+      await fetch(API_URL + `?action=release_reservation&preference_id=${encodeURIComponent(preferenceId)}`, { method: "GET" });
     } catch (e) {}
   }
 
@@ -1405,8 +1398,10 @@
   const promoEndsAt = document.getElementById("promoEndsAt");
   const promoBar = document.getElementById("promoBar");
 
-  // ✅ Resultado UI
   const promoResult = document.getElementById("promoResult");
+  const promoVideoWrap = document.getElementById("promoVideoWrap");
+  const btnToggleResult = document.getElementById("btnToggleResult");
+  const btnHideResult = document.getElementById("btnHideResult");
 
   function formatEndsAt_(iso){
     try{
@@ -1442,6 +1437,28 @@
     if (phoneInput) phoneInput.disabled = !enabled;
   }
 
+  function closePromoVideo_(){
+    if (!promoVideoWrap) return;
+    promoVideoWrap.classList.remove("open");
+    if (btnToggleResult) btnToggleResult.textContent = "Ver resultado";
+  }
+
+  function togglePromoVideo_(){
+    if (!promoVideoWrap) return;
+    const willOpen = !promoVideoWrap.classList.contains("open");
+    if (willOpen) {
+      promoVideoWrap.classList.add("open");
+      if (btnToggleResult) btnToggleResult.textContent = "Ocultar";
+      // scroll suave al video para que no "tape" toda la pantalla, solo te lleve al bloque
+      setTimeout(() => promoVideoWrap.scrollIntoView({ behavior: "smooth", block: "start" }), 120);
+    } else {
+      closePromoVideo_();
+    }
+  }
+
+  if (btnToggleResult) btnToggleResult.addEventListener("click", togglePromoVideo_);
+  if (btnHideResult) btnHideResult.addEventListener("click", closePromoVideo_);
+
   function initPromo72h_(){
     promoEndsAt.textContent = `⏳ Termina: ${formatEndsAt_(PROMO_END_ISO)} (Hermosillo)`;
 
@@ -1459,12 +1476,11 @@
         promoState.classList.add("text-red-400");
         promoBar.style.width = "0%";
 
-        // ✅ mostrar resultado
+        // ✅ mostrar bloque de resultado, pero mantener video cerrado por defecto
         if (promoResult) promoResult.classList.remove("hidden");
+        closePromoVideo_();
 
-        if (PROMO_BLOCK_PURCHASES_WHEN_ENDS) {
-          setPurchasesEnabled_(false);
-        }
+        if (PROMO_BLOCK_PURCHASES_WHEN_ENDS) setPurchasesEnabled_(false);
         return;
       }
 
@@ -1476,12 +1492,11 @@
       const progress = Math.min(1, Math.max(0, (end - now) / (end - start)));
       promoBar.style.width = `${Math.round(progress * 100)}%`;
 
-      // ✅ ocultar resultado mientras está activo
+      // ocultar resultado mientras está activo
       if (promoResult) promoResult.classList.add("hidden");
+      closePromoVideo_();
 
-      if (PROMO_BLOCK_PURCHASES_WHEN_ENDS) {
-        setPurchasesEnabled_(true);
-      }
+      if (PROMO_BLOCK_PURCHASES_WHEN_ENDS) setPurchasesEnabled_(true);
     }
 
     tick();
